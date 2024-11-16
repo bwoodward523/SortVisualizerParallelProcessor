@@ -7,6 +7,13 @@ public class Sort {
     float[] arr = new float[size];
     Random rand = new Random();
     boolean isDrawing = false;
+
+    // Enumerators for sorting algorithms
+    public enum SortType {
+        BUBBLE,
+        SELECTION
+    }
+
     public void setSize(int s){
         if (s > 0) {
             size = s;
@@ -65,7 +72,8 @@ public class Sort {
     /*
     * We should redraw only the rectangles that need to be redrawn to increase speed
     * */
-    private void drawArrayRects(){
+    private void drawArrayRects(float[] arr){
+        int size = arr.length;
         float width = 1f / size; //half of the screen width divided by the size
         float offsetter = (1f / size + width)/2;
         float offset = offsetter/2;
@@ -92,14 +100,15 @@ public class Sort {
     */
 
     //Use to redraw the array in the sorting functions (Requires double Buffering)
-    public void drawSortStep(int pauseTime){
+    public void drawSortStep(int pauseTime, float[] arr){
         StdDraw.clear();
-        drawArrayRects();
+        drawArrayRects(arr);
         StdDraw.show();
         StdDraw.pause(pauseTime);
     }
-    public void selectionSort() {
+    public void selectionSort(float[] arr) {
         Clip sound = playSound(0);
+        int size = arr.length;
 
         for (int i = 0; i < size - 1; i++) {
             int minIndex = i;
@@ -115,16 +124,19 @@ public class Sort {
                 sound.stop();
                 sound = playSound(convertArrayHeightToPitchRange(arr[i]) * 100);
             }
-            drawSortStep(0);
+            drawSortStep(0, arr);
         }
+        System.out.println("Selection Sort Finished\n");
     }
     //Takes the height of the rectangle and converts it to a pitch range, -1 is the lowest pitch 1 is the highest pitch
     //The array ranges from 0 to 1
     public float convertArrayHeightToPitchRange(float height){
         return (height * 2) - 1;
     }
-    public void bubbleSort(){
+
+    public void bubbleSort(float[] arr){
         Clip sound = playSound(0);
+        int size = arr.length;
 
         for (int i = 0; i < size - 1; i++){
             for (int k = 0; k < size - i - 1; k++){
@@ -135,11 +147,12 @@ public class Sort {
                     sound.stop();
                     sound = playSound(convertArrayHeightToPitchRange(arr[k]));
                 }
-                drawSortStep(0);
+                drawSortStep(0, arr);
 
 
             }
         }
+        System.out.println("Bubble Sort Finished\n");
     }
     public static void main(String[] args) {
         StdDraw.setCanvasSize(800,800);
@@ -148,19 +161,24 @@ public class Sort {
         StdDraw.enableDoubleBuffering();
 
         Sort sorter = new Sort();
+        ParallelProcessor processor = new ParallelProcessor();
         sorter.drawBackground(Color.BLACK);
-        sorter.setSize(500);
+        sorter.setSize(750);
         sorter.initializeArray();
         sorter.printArray();
-        sorter.drawArrayRects();
+        sorter.drawArrayRects(sorter.arr);
 
         //4 fun
         sorter.setRandomPenColor();
 
+        // Setup Parrallel Processing
+        int taskNum = 4;
         //sorter.bubbleSort();
-        sorter.selectionSort();
+        // sorter.selectionSort();
+        processor.setupTasks(taskNum, sorter.arr, SortType.SELECTION);
+
 
         sorter.setRandomPenColor();
-        sorter.drawArrayRects();
+        sorter.drawArrayRects(sorter.arr);
     }
 }
