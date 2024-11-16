@@ -11,7 +11,8 @@ public class Sort {
     // Enumerators for sorting algorithms
     public enum SortType {
         BUBBLE,
-        SELECTION
+        SELECTION,
+        ANGEL
     }
 
     public void setSize(int s) {
@@ -75,7 +76,8 @@ public class Sort {
     /*
      * We should redraw only the rectangles that need to be redrawn to increase speed
      * */
-    private void drawArrayRects(float[] arr, int taskNum, int taskTotal) {
+    private void drawArrayRects(float[] arr, int taskNum,
+                                int taskTotal) {
         int quadrant = taskNum % taskTotal;
         int rows = (int) Math.sqrt(taskTotal);
         int cols = (int) Math.ceil((double) taskTotal / rows);
@@ -109,8 +111,12 @@ public class Sort {
         float width = 1f / cols;
         float height = 1f / rows;
 
+        int size = arr.length;
+        float rectWidth = width / size;
+        float offset = xOffset + rectWidth / 2;
+
         StdDraw.setPenColor(StdDraw.BLACK);
-        StdDraw.filledRectangle(xOffset + width / 2, yOffset + height / 2, width / 2, height / 2);
+        StdDraw.filledRectangle(offset * rectWidth, yOffset + height / 2, rectWidth / 2, height / 2);
         StdDraw.setPenColor(StdDraw.WHITE);
     }
 
@@ -130,7 +136,8 @@ public class Sort {
      */
 
     //Use to redraw the array in the sorting functions (Requires double Buffering)
-    public void drawSortStep(int pauseTime, float[] arr, int taskNum, int taskTotal) {
+    public void drawSortStep(int pauseTime, float[] arr,
+                             int taskNum, int taskTotal) {
         clearQuadrant(taskNum, taskTotal);
         drawArrayRects(arr, taskNum, taskTotal);
         StdDraw.show();
@@ -188,6 +195,37 @@ public class Sort {
             System.out.println("Bubble Sort Finished\n");
         }
 
+        public void angelSort(float[] arr, int taskNum, int taskTotal) {
+            Clip sound = playSound(0);
+            int size = arr.length;
+
+            while(!isSorted(arr))
+            {
+                for(int i = 0; i < size; i++)
+                {
+                    if(rand.nextInt(2) == 0 && i < size - 1)
+                    {
+                        float temp = arr[i];
+                        arr[i] = arr[i+1];
+                        arr[i+1] = temp;
+                        sound.stop();
+                        sound = playSound(convertArrayHeightToPitchRange(arr[i]));
+                    }
+                }
+                drawSortStep(0, arr, taskNum, taskTotal);
+            }
+            System.out.println("Angel Sort Finished\n");
+        }
+
+        public static boolean isSorted(float[] a) {
+            for (int i = 0; i < a.length - 1; i++) {
+                if (a[i] > a[i + 1]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public static void main (String[]args){
             StdDraw.setCanvasSize(800, 800);
             StdDraw.setScale(0, 1);
@@ -197,7 +235,7 @@ public class Sort {
             Sort sorter = new Sort();
             ParallelProcessor processor = new ParallelProcessor();
             sorter.drawBackground(Color.BLACK);
-            sorter.setSize(750);
+            sorter.setSize(10);
             sorter.initializeArray();
             sorter.printArray();
             //sorter.drawArrayRects(sorter.arr, );
@@ -206,10 +244,10 @@ public class Sort {
             sorter.setRandomPenColor();
 
             // Setup Parrallel Processing
-            int total = 10;
+            int total = 2;
             //sorter.bubbleSort();
             // sorter.selectionSort();
-            processor.setupTasks(total, sorter.arr, SortType.BUBBLE);
+            processor.setupTasks(total, sorter.arr, SortType.ANGEL);
 
 
             sorter.setRandomPenColor();
