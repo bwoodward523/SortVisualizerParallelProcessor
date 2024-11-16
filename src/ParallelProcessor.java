@@ -21,10 +21,10 @@ public class ParallelProcessor {
                 System.out.println("Executing task " + finalI + " by " + Thread.currentThread().getName());
                 switch (algorithm) {
                     case SELECTION:
-                        sorter.selectionSort(subArray);
+                        sorter.selectionSort(subArray, finalI, taskNum);
                         break;
                     case BUBBLE:
-                        sorter.bubbleSort(subArray);
+                        sorter.bubbleSort(subArray, finalI, taskNum);
                         break;
                 }
                 sortedSubArrays[finalI] = subArray;
@@ -65,17 +65,17 @@ public class ParallelProcessor {
             } else {
                 mergedArray[k++] = arr2[j++];
             }
-            sorter.drawSortStep(0, mergedArray); // Visualize the merging process
+            //sorter.drawSortStep(0, mergedArray, 1, 1); // Visualize the merging process
         }
 
         while (i < n1) {
             mergedArray[k++] = arr1[i++];
-            sorter.drawSortStep(0, mergedArray); // Visualize the merging process
+            sorter.drawSortStep(0, mergedArray, 1 ,1); // Visualize the merging process
         }
 
         while (j < n2) {
             mergedArray[k++] = arr2[j++];
-            sorter.drawSortStep(0, mergedArray); // Visualize the merging process
+            sorter.drawSortStep(0, mergedArray, 1, 1); // Visualize the merging process
         }
 
         return mergedArray;
