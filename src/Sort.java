@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.util.Random;
+import javax.sound.sampled.*;
 
 public class Sort {
     int size = 1;
@@ -7,9 +8,14 @@ public class Sort {
     Random rand = new Random();
     boolean isDrawing = false;
     public void setSize(int s){
-        size = s;
-        arr = new float[size];
+        if (s > 0) {
+            size = s;
+            arr = new float[size];
+        } else {
+            throw new IllegalArgumentException("Size must be positive");
+        }
     }
+
     public void printArray(){
         // Print the array
         for (float num : arr) {
@@ -25,6 +31,28 @@ public class Sort {
                 arr[i] = .011f;
             }
         }
+    }
+    private Clip playSound(float pitch) {
+        try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource("laserShoot.wav"));
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioInputStream);
+            clip.start();
+            AudioFormat baseFormat = audioInputStream.getFormat();
+            AudioFormat newFormat = new AudioFormat(
+                    baseFormat.getEncoding(),
+                    baseFormat.getSampleRate() * pitch,
+                    baseFormat.getSampleSizeInBits(),
+                    baseFormat.getChannels(),
+                    baseFormat.getFrameSize(),
+                    baseFormat.getFrameRate() * pitch,
+                    baseFormat.isBigEndian()
+            );
+            return clip;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     private void setRandomPenColor(){
         int red = (int) (Math.random() * 256);
@@ -42,8 +70,8 @@ public class Sort {
         float offsetter = (1f / size + width)/2;
         float offset = offsetter/2;
         isDrawing = true;
-        for (int i = 0; i< arr.length; i++){
-            StdDraw.filledRectangle(offset,0,width/2 -.005,arr[i]);
+        for (int i = 0; i< arr.length; i++){ //Half width is weird still gotta figure out what number to put in
+            StdDraw.filledRectangle(offset,0,width/2 -.000005,arr[i]);
             offset += offsetter;
 
         }
@@ -56,34 +84,82 @@ public class Sort {
     public boolean getIsDrawing(){
         return isDrawing;
     }
-    //How to make it wait for drawing to finish before drawing again??
-    public void bubbleStep(){
+    /* Optimization thots
+    *  How to make it wait for drawing to finish before drawing again??
+    *  WE can draw background color rect over old pos then draw new one on top instead of redrawing
+    *  We can create some sort of object system that allows us to have rectangle objects and move functions
+    *  ^^ this would be good
+    */
+
+    //Use to redraw the array in the sorting functions (Requires double Buffering)
+    public void drawSortStep(int pauseTime){
+        StdDraw.clear();
+        drawArrayRects();
+        StdDraw.show();
+        StdDraw.pause(pauseTime);
+    }
+    public void selectionSort() {
+        Clip sound = playSound(0);
+
+        for (int i = 0; i < size - 1; i++) {
+            int minIndex = i;
+            for (int j = i + 1; j < size; j++) {
+                if (arr[j] < arr[minIndex]) {
+                    minIndex = j;
+                }
+            }
+            if (minIndex != i) {
+                float temp = arr[i];
+                arr[i] = arr[minIndex];
+                arr[minIndex] = temp;
+                sound.stop();
+                sound = playSound(convertArrayHeightToPitchRange(arr[i]) * 100);
+            }
+            drawSortStep(0);
+        }
+    }
+    //Takes the height of the rectangle and converts it to a pitch range, -1 is the lowest pitch 1 is the highest pitch
+    //The array ranges from 0 to 1
+    public float convertArrayHeightToPitchRange(float height){
+        return (height * 2) - 1;
+    }
+    public void bubbleSort(){
+        Clip sound = playSound(0);
+
         for (int i = 0; i < size - 1; i++){
             for (int k = 0; k < size - i - 1; k++){
                 if(arr[k] > arr[k+1]){
                     float temp = arr[k];
                     arr[k] = arr[k+1];
                     arr[k+1] = temp;
+                    sound.stop();
+                    sound = playSound(convertArrayHeightToPitchRange(arr[k]));
                 }
-                StdDraw.clear();
-                drawArrayRects();
+                drawSortStep(0);
+
+
             }
         }
     }
     public static void main(String[] args) {
-        System.out.println("Hello World");
         StdDraw.setCanvasSize(800,800);
         StdDraw.setScale(0,1);
 
+        StdDraw.enableDoubleBuffering();
 
         Sort sorter = new Sort();
         sorter.drawBackground(Color.BLACK);
-        sorter.setSize(10);
+        sorter.setSize(500);
         sorter.initializeArray();
         sorter.printArray();
         sorter.drawArrayRects();
 
-        sorter.bubbleStep();
+        //4 fun
+        sorter.setRandomPenColor();
+
+        //sorter.bubbleSort();
+        sorter.selectionSort();
+
         sorter.setRandomPenColor();
         sorter.drawArrayRects();
     }
