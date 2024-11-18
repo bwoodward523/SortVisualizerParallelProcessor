@@ -68,7 +68,7 @@ public class ParallelProcessor {
             } else {
                 mergedArray[k++] = arr2[j++];
             }
-            
+
             //sorter.drawSortStep(0, mergedArray, 1, 1); // Visualize the merging process
         }
 

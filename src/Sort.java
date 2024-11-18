@@ -226,6 +226,27 @@ public class Sort {
         return true;
     }
 
+    static int factorial(int n)
+    {
+        int res = 1, i;
+        for (i = 2; i <= n; i++)
+            res *= i;
+        return res;
+    }
+
+    public static void printExpectedTime(SortType type, int size)
+    {
+        switch (type) {
+            case BUBBLE, SELECTION:
+                double result = ((double) (size ^ 2) / (100^2))*0.01;
+                System.out.println("Expected time complexity: "+result);
+                break;
+            case ANGEL:
+                double result2 = (size*(factorial(size)))*0.01;
+                System.out.println("Expected time complexity: "+result2);
+                break;
+        }
+    }
 
     public static void main (String[]args){
         StdDraw.setCanvasSize(800, 800);
@@ -236,7 +257,9 @@ public class Sort {
         Sort sorter = new Sort();
         ParallelProcessor processor = new ParallelProcessor();
         sorter.drawBackground(Color.BLACK);
-        sorter.setSize(4000);
+
+        int size = 6;
+        sorter.setSize(size);
         sorter.initializeArray();
         sorter.printArray();
         //sorter.drawArrayRects(sorter.arr, );
@@ -245,8 +268,13 @@ public class Sort {
         sorter.setRandomPenColor();
 
         // Setup Parrallel Processing
-        int total = 4;
-        processor.setupTasks(total, sorter.arr, SortType.SELECTION);
+        int total = 1;
+        SortType type = SortType.ANGEL;
+
+        printExpectedTime(type, size);
+        
+        processor.setupTasks(total, sorter.arr, type);
+
 
 
         sorter.setRandomPenColor();
