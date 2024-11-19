@@ -34,7 +34,7 @@ public class Sort {
     }
     private Clip playSound(float pitch) {
         try {
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource("laserShoot.wav"));
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource("/sounds/hitHurt.wav"));
             Clip clip = AudioSystem.getClip();
             clip.open(audioInputStream);
             clip.start();
@@ -113,9 +113,15 @@ public class Sort {
                 arr[i] = arr[minIndex];
                 arr[minIndex] = temp;
                 sound.stop();
-                sound = playSound(convertArrayHeightToPitchRange(arr[i]) * 100);
+                sound = playSound(convertArrayHeightToPitchRange(arr[i]) * -2);
             }
             drawSortStep(0);
+        }
+    }
+    public void playSoundOnAllRects(){
+        for (int i = 0; i < size; i++){
+            playSound((arr[i])*2000);
+            StdDraw.pause(20);
         }
     }
     //Takes the height of the rectangle and converts it to a pitch range, -1 is the lowest pitch 1 is the highest pitch
@@ -160,6 +166,8 @@ public class Sort {
         //sorter.bubbleSort();
         sorter.selectionSort();
 
+        StdDraw.pause(1000);
+        sorter.playSoundOnAllRects();
         sorter.setRandomPenColor();
         sorter.drawArrayRects();
     }
