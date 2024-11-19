@@ -163,7 +163,7 @@ public class Sort {
                     sound.stop();
                     sound = playSound(convertArrayHeightToPitchRange(arr[i]) * 100);
                 }
-                drawSortStep(0, arr, taskNum, taskTotal);
+                drawSortStep(2, arr, taskNum, taskTotal);
             }
             System.out.println("Selection Sort Finished\n");
         }
@@ -258,7 +258,10 @@ public class Sort {
         ParallelProcessor processor = new ParallelProcessor();
         sorter.drawBackground(Color.BLACK);
 
-        int size = 6;
+        // Initialize the Sorter
+        // -- Make sure this value isn't too large, or your
+        // -- computer will freeze
+        int size = 8;
         sorter.setSize(size);
         sorter.initializeArray();
         sorter.printArray();
@@ -268,6 +271,8 @@ public class Sort {
         sorter.setRandomPenColor();
 
         // Setup Parrallel Processing
+        // -- Total variable assigns how many cores should be used
+        // -- Before setting this var, make sure to check how many cores your computer has
         int total = 1;
         SortType type = SortType.ANGEL;
 
