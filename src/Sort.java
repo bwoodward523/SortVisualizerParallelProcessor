@@ -260,39 +260,65 @@ public class Sort {
         AtomicInteger breakVar = new AtomicInteger();
 
         // Create the main frame
-        JFrame frame = new JFrame("Drop-Down Example");
+        JFrame frame = new JFrame("Sorting Algorithm Visualizer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 800);
-        frame.setLayout(new FlowLayout());
+        frame.setLayout(new GridBagLayout());
+        frame.getContentPane().setBackground(Color.DARK_GRAY);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Create a drop-down (JComboBox)
-        String[] types = {"Angel","Bubble", "Selection"};
+        String[] types = {"Angel", "Bubble", "Selection"};
         JComboBox<String> typeDropDown = new JComboBox<>(types);
-        JButton ejectButton = new JButton("Run");
-        frame.add(new JLabel("Select a Sorting Algorithm:"));
+        typeDropDown.setToolTipText("Select a Sorting Algorithm");
 
+        JLabel typeLabel = new JLabel("Select a Sorting Algorithm: ");
+        typeLabel.setForeground(Color.WHITE);
+
+        // Create labels and text fields
         JLabel nodeLabel = new JLabel("Enter how many nodes you want:");
-        // Create a text box (JTextField)
-        JTextField nodeBox = new JTextField(20); // 20 columns wide
+        nodeLabel.setForeground(Color.WHITE);
+        JTextField nodeBox = new JTextField(20);
 
-        JLabel coreLabel = new JLabel("Enter how many cores do you want to use:");
-        JTextField coreBox = new JTextField(20); // 20 columns wide
+        JLabel coreLabel = new JLabel("Enter how many cores you want to use:");
+        coreLabel.setForeground(Color.WHITE);
+        JTextField coreBox = new JTextField(20);
 
-        frame.add(typeDropDown);
-        frame.add(ejectButton);
-        frame.add(nodeLabel);
-        frame.add(nodeBox);
-        frame.add(coreLabel);
-        frame.add(coreBox);
+        JButton ejectButton = new JButton("Run");
 
+        // Add components to the frame
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        frame.add(typeLabel, gbc);
 
+        gbc.gridx = 1;
+        frame.add(typeDropDown, gbc);
 
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        frame.add(nodeLabel, gbc);
+
+        gbc.gridx = 1;
+        frame.add(nodeBox, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        frame.add(coreLabel, gbc);
+
+        gbc.gridx = 1;
+        frame.add(coreBox, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        frame.add(ejectButton, gbc);
 
         // Make the frame visible
         frame.setVisible(true);
 
-
-        while(breakVar.get() != 1){
+        while (breakVar.get() != 1) {
             // Add an ActionListener to handle selection changes
             typeDropDown.addActionListener(new ActionListener() {
                 @Override
@@ -301,9 +327,9 @@ public class Sort {
 
                     // Change the panel's background color based on selection
                     switch (Objects.requireNonNull(selectedType)) {
-                        case "Angel" -> type[0] = SortType.ANGEL;
-                        case "Bubble" -> type[0] = SortType.BUBBLE;
-                        case "Selection" -> type[0] = SortType.SELECTION;
+                        case "Angel" -> type[0] = Sort.SortType.ANGEL;
+                        case "Bubble" -> type[0] = Sort.SortType.BUBBLE;
+                        case "Selection" -> type[0] = Sort.SortType.SELECTION;
                     }
                 }
             });
@@ -337,8 +363,12 @@ public class Sort {
         sorter.setRandomPenColor();
 
         // Setup Parrallel Processing
+        //processor.setupTasks(total[0], sorter.arr, type[0]);
+        //processor.startThreads(sorter.arr, type[0]);
+
+        //sorter.drawArrayRects(sorter.arr, 0, 1);
         printExpectedTime(type[0], size[0]);
-        processor.setupTasks(total[0], sorter.arr, type[0]);    
+        processor.setupTasks(total[0], sorter.arr, type[0]);
 
         sorter.setRandomPenColor();
         //sorter.drawArrayRects(sorter.arr);
