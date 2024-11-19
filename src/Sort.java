@@ -2,6 +2,7 @@ import java.awt.*;
 import java.util.Random;
 import javax.sound.sampled.*;
 import javax.swing.*;
+import javax.swing.ImageIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
@@ -260,10 +261,14 @@ public class Sort {
         AtomicInteger breakVar = new AtomicInteger();
 
         // Create the main frame
-        JFrame frame = new JFrame("Drop-Down Example");
+        JFrame frame = new JFrame("Sort Visualizer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 800);
         frame.setLayout(new FlowLayout());
+
+        // Set custom icon
+        ImageIcon icon = new ImageIcon("src/icon.png");
+        frame.setIconImage(icon.getImage());
 
         // Create a drop-down (JComboBox)
         String[] types = {"Angel","Bubble", "Selection"};
