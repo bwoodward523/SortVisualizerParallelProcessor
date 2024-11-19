@@ -1,6 +1,11 @@
 import java.awt.*;
 import java.util.Random;
 import javax.sound.sampled.*;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Sort {
     int size = 1;
@@ -249,6 +254,70 @@ public class Sort {
     }
 
     public static void main (String[]args){
+        final int[] total = {1};
+        final SortType[] type = {SortType.ANGEL};
+        final int[] size = {0};
+        AtomicInteger breakVar = new AtomicInteger();
+
+        // Create the main frame
+        JFrame frame = new JFrame("Drop-Down Example");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 800);
+        frame.setLayout(new FlowLayout());
+
+        // Create a drop-down (JComboBox)
+        String[] types = {"Angel","Bubble", "Selection"};
+        JComboBox<String> typeDropDown = new JComboBox<>(types);
+        JButton ejectButton = new JButton("Run");
+        frame.add(new JLabel("Select a Sorting Algorithm:"));
+
+        JLabel nodeLabel = new JLabel("Enter how many nodes you want:");
+        // Create a text box (JTextField)
+        JTextField nodeBox = new JTextField(20); // 20 columns wide
+
+        JLabel coreLabel = new JLabel("Enter how many cores do you want to use:");
+        JTextField coreBox = new JTextField(20); // 20 columns wide
+
+        frame.add(typeDropDown);
+        frame.add(ejectButton);
+        frame.add(nodeLabel);
+        frame.add(nodeBox);
+        frame.add(coreLabel);
+        frame.add(coreBox);
+
+
+
+
+        // Make the frame visible
+        frame.setVisible(true);
+
+
+        while(breakVar.get() != 1){
+            // Add an ActionListener to handle selection changes
+            typeDropDown.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    String selectedType = (String) typeDropDown.getSelectedItem();
+
+                    // Change the panel's background color based on selection
+                    switch (Objects.requireNonNull(selectedType)) {
+                        case "Angel" -> type[0] = SortType.ANGEL;
+                        case "Bubble" -> type[0] = SortType.BUBBLE;
+                        case "Selection" -> type[0] = SortType.SELECTION;
+                    }
+                }
+            });
+            ejectButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    breakVar.set(1);
+                    size[0] = Integer.parseInt(nodeBox.getText()); // Get text from the text box
+                    total[0] = Integer.parseInt(coreBox.getText());
+                }
+            });
+        }
+        frame.dispose();
+
         StdDraw.setCanvasSize(800, 800);
         StdDraw.setScale(0, 1);
 
@@ -258,11 +327,8 @@ public class Sort {
         ParallelProcessor processor = new ParallelProcessor();
         sorter.drawBackground(Color.BLACK);
 
-        // Initialize the Sorter
-        // -- Make sure this value isn't too large, or your
-        // -- computer will freeze
-        int size = 8;
-        sorter.setSize(size);
+
+        sorter.setSize(size[0]);
         sorter.initializeArray();
         sorter.printArray();
         //sorter.drawArrayRects(sorter.arr, );
@@ -271,16 +337,8 @@ public class Sort {
         sorter.setRandomPenColor();
 
         // Setup Parrallel Processing
-        // -- Total variable assigns how many cores should be used
-        // -- Before setting this var, make sure to check how many cores your computer has
-        int total = 1;
-        SortType type = SortType.ANGEL;
-
-        printExpectedTime(type, size);
-        
-        processor.setupTasks(total, sorter.arr, type);
-
-
+        printExpectedTime(type[0], size[0]);
+        processor.setupTasks(total[0], sorter.arr, type[0]);    
 
         sorter.setRandomPenColor();
         //sorter.drawArrayRects(sorter.arr);

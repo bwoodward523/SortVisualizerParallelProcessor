@@ -3,7 +3,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class ParallelProcessor {
-
     public void setupTasks(int taskNum, float[] arr, Sort.SortType algorithm) {
         ExecutorService executor = Executors.newFixedThreadPool(taskNum);
         Sort sorter = new Sort();
