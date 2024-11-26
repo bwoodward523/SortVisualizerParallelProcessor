@@ -283,7 +283,7 @@ public class Sort {
         processor.setupTasks(total[0], sorter.arr, type[0]);
 
         StdDraw.pause(1000);
-        sorter.playSoundOnAllRects();
+        //sorter.playSoundOnAllRects();
         sorter.setRandomPenColor();
         //sorter.drawArrayRects(sorter.arr);
     }
