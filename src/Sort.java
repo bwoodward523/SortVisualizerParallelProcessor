@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 import javax.sound.sampled.*;
 import javax.swing.*;
@@ -7,11 +9,14 @@ import java.awt.event.ActionListener;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static javax.sound.sampled.AudioSystem.getAudioInputStream;
+
 public class Sort {
     int size = 1;
     float[] arr = new float[size];
     Random rand = new Random();
     boolean isDrawing = false;
+    File soundFile = new File("src/sounds/hitHurt.wav");
 
     // Enumerators for sorting algorithms
     public enum SortType {
@@ -45,29 +50,75 @@ public class Sort {
             }
         }
     }
-
-    private Clip playSound(float pitch) {
+    private Clip playSound(float pitch, final File soundFile) {
+        if (pitch == 0)
+            pitch = 1;
         try {
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource("/sounds/hitHurt.wav"));
+            if (!soundFile.exists()) {
+                System.err.println("Sound file does not exist: " + soundFile.getAbsolutePath());
+                return null;
+            }
+
+            final AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(soundFile);
             Clip clip = AudioSystem.getClip();
             clip.open(audioInputStream);
+
+            // Adjust the pitch using FloatControl
+            if (clip.isControlSupported(FloatControl.Type.SAMPLE_RATE)) {
+                FloatControl control = (FloatControl) clip.getControl(FloatControl.Type.SAMPLE_RATE);
+                control.setValue(control.getValue() * pitch);
+            } else {
+                System.err.println("Sample rate control not supported for this audio file.");
+            }
             clip.start();
-            AudioFormat baseFormat = audioInputStream.getFormat();
-            AudioFormat newFormat = new AudioFormat(
-                    baseFormat.getEncoding(),
-                    baseFormat.getSampleRate() * pitch,
-                    baseFormat.getSampleSizeInBits(),
-                    baseFormat.getChannels(),
-                    baseFormat.getFrameSize(),
-                    baseFormat.getFrameRate() * pitch,
-                    baseFormat.isBigEndian()
-            );
             return clip;
+        } catch (UnsupportedAudioFileException e) {
+            System.err.println("Unsupported audio file format: " + soundFile.getAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("Error reading the audio file: " + soundFile.getAbsolutePath());
+        } catch (LineUnavailableException e) {
+            System.err.println("Audio line unavailable: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
+//    private Clip playSound(float pitch, final File soundFile) {
+//        System.out.println(soundFile.isDirectory());
+//        if (pitch == 0)
+//            pitch = 1;
+//        try {
+//            final AudioInputStream audioInputStream = getAudioInputStream(soundFile);//AudioSystem.getAudioInputStream(getClass().getResource("/sounds/hitHurt.wav"));
+//            Clip clip = AudioSystem.getClip();
+//
+//            AudioFormat baseFormat = audioInputStream.getFormat();
+//
+////            if (baseFormat.getSampleRate() == 0) {
+////                System.err.println("Base format sample rate is 0. Check the audio file format.");
+////                return null;
+////            }
+//
+//            float sampleRate = baseFormat.getSampleRate() == 0 ? 44100 : baseFormat.getSampleRate(); // Use 44100 if sample rate is 0
+//
+//            AudioFormat newFormat = new AudioFormat(
+//                    baseFormat.getEncoding(),
+//                    sampleRate * pitch,
+//                    baseFormat.getSampleSizeInBits(),
+//                    baseFormat.getChannels(),
+//                    baseFormat.getFrameSize(),
+//                    sampleRate * pitch,
+//                    baseFormat.isBigEndian()
+//            );
+//            final AudioInputStream newStream = AudioSystem.getAudioInputStream(newFormat, audioInputStream);
+//            AudioSystem.write(newStream, AudioFileFormat.Type.WAVE, soundFile);
+//            clip.open(newStream);
+//            clip.start();
+//            return clip;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
     private void setRandomPenColor() {
         int red = (int) (Math.random() * 256);
@@ -151,7 +202,7 @@ public class Sort {
 
     public void selectionSort(float[] arr, int taskNum, int taskTotal) {
         {
-            Clip sound = playSound(0);
+            Clip sound = playSound(0, soundFile);
             int size = arr.length;
 
             for (int i = 0; i < size - 1; i++) {
@@ -166,7 +217,7 @@ public class Sort {
                     arr[i] = arr[minIndex];
                     arr[minIndex] = temp;
                     sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[i]) * 100);
+                    sound = playSound(convertArrayHeightToPitchRange(arr[i]) * 100, soundFile);
                 }
                 drawSortStep(0, arr, taskNum, taskTotal);
             }
@@ -175,7 +226,7 @@ public class Sort {
     }
     public void playSoundOnAllRects(){
         for (int i = 0; i < size; i++){
-            playSound((arr[i])*2000);
+            playSound((arr[i])*2000, soundFile);
             StdDraw.pause(20);
         }
     }
@@ -186,7 +237,7 @@ public class Sort {
     }
 
     public void bubbleSort ( float[] arr, int taskNum, int taskTotal){
-        Clip sound = playSound(0);
+        Clip sound = playSound(0, soundFile);
         int size = arr.length;
 
         for (int i = 0; i < size - 1; i++) {
@@ -196,7 +247,7 @@ public class Sort {
                     arr[k] = arr[k + 1];
                     arr[k + 1] = temp;
                     sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                    sound = playSound(convertArrayHeightToPitchRange(arr[k]), soundFile);
                 }
                 drawSortStep(0, arr, taskNum, taskTotal);
 
@@ -207,7 +258,7 @@ public class Sort {
     }
 
     public void angelSort(float[] arr, int taskNum, int taskTotal) {
-        Clip sound = playSound(0);
+        Clip sound = playSound(0, soundFile);
         int size = arr.length;
 
         while(!isSorted(arr))
@@ -220,7 +271,7 @@ public class Sort {
                     arr[i] = arr[i+1];
                     arr[i+1] = temp;
                     sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[i]));
+                    sound = playSound(convertArrayHeightToPitchRange(arr[i]), soundFile);
                 }
             }
             drawSortStep(0, arr, taskNum, taskTotal);
