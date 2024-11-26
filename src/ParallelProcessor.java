@@ -6,6 +6,7 @@ public class ParallelProcessor {
     public void setupTasks(int taskNum, float[] arr, Sort.SortType algorithm) {
         ExecutorService executor = Executors.newFixedThreadPool(taskNum);
         Sort sorter = new Sort();
+        SortingAlgorithms alg = new SortingAlgorithms();
         int subArraySize = arr.length / taskNum;
         float[][] sortedSubArrays = new float[taskNum][];
 
@@ -20,13 +21,16 @@ public class ParallelProcessor {
                 System.out.println("Executing task " + finalI + " by " + Thread.currentThread().getName());
                 switch (algorithm) {
                     case SELECTION:
-                        sorter.selectionSort(subArray, finalI, taskNum);
+                        alg.selectionSort(subArray, finalI, taskNum);
                         break;
                     case BUBBLE:
-                        sorter.bubbleSort(subArray, finalI, taskNum);
+                        alg.bubbleSort(subArray, finalI, taskNum);
                         break;
                     case ANGEL:
-                        sorter.angelSort(subArray, finalI, taskNum);
+                        alg.angelSort(subArray, finalI, taskNum);
+                        break;
+                    case QUICK:
+                        alg.quickSort(subArray, 0, subArray.length - 1, finalI, taskNum);
                         break;
                 }
                 sortedSubArrays[finalI] = subArray;
@@ -47,14 +51,14 @@ public class ParallelProcessor {
         // Merge sorted subarrays
         float[] mergedArray = sortedSubArrays[0];
         for (int i = 1; i < sortedSubArrays.length; i++) {
-            mergedArray = mergeArrays(mergedArray, sortedSubArrays[i], sorter);
+            mergedArray = mergeArrays(mergedArray, sortedSubArrays[i], alg);
         }
 
         // Copy merged array back to original array
         System.arraycopy(mergedArray, 0, arr, 0, arr.length);
     }
 
-    public static float[] mergeArrays(float[] arr1, float[] arr2, Sort sorter) {
+    public static float[] mergeArrays(float[] arr1, float[] arr2, SortingAlgorithms sorter) {
         int n1 = arr1.length;
         int n2 = arr2.length;
         float[] mergedArray = new float[n1 + n2];

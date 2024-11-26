@@ -2,6 +2,7 @@ import java.awt.*;
 import java.util.Random;
 import javax.sound.sampled.*;
 import javax.swing.*;
+import javax.swing.ImageIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
@@ -17,7 +18,9 @@ public class Sort {
     public enum SortType {
         BUBBLE,
         SELECTION,
-        ANGEL
+        ANGEL,
+        QUICK,
+        RADIX
     }
 
     public void setSize(int s) {
@@ -78,165 +81,18 @@ public class Sort {
         StdDraw.setPenColor(new Color(red, green, blue));
     }
 
-    /*
-     * We should redraw only the rectangles that need to be redrawn to increase speed
-     * */
-    private void drawArrayRects(float[] arr, int taskNum,
-                                int taskTotal) {
-        int quadrant = taskNum % taskTotal;
-        int rows = (int) Math.sqrt(taskTotal);
-        int cols = (int) Math.ceil((double) taskTotal / rows);
-        int row = quadrant / cols;
-        int col = quadrant % cols;
 
-        float xOffset = (float) col / cols;
-        float yOffset = (float) row / rows;
-        float width = 1f / cols;
-        float height = 1f / rows;
-
-        int size = arr.length;
-        float rectWidth = width / size;
-        float offset = xOffset + rectWidth / 2;
-
-        for (int i = 0; i < size; i++) {
-            StdDraw.filledRectangle(offset, yOffset + arr[i] * height / 2, rectWidth / 2, arr[i] * height / 2);
-            offset += rectWidth;
-        }
-    }
-
-    private void clearQuadrant(int taskNum, int taskTotal) {
-        int quadrant = taskNum % taskTotal;
-        int rows = (int) Math.sqrt(taskTotal);
-        int cols = (int) Math.ceil((double) taskTotal / rows);
-        int row = quadrant / cols;
-        int col = quadrant % cols;
-
-        float xOffset = (float) col / cols;
-        float yOffset = (float) row / rows;
-        float width = 1f / cols;
-        float height = 1f / rows;
-
-        //int size = arr.length;
-        //float rectWidth = width / size;
-        //float offset = xOffset + rectWidth / 2;
-
-        StdDraw.setPenColor(StdDraw.BLACK);
-        StdDraw.filledRectangle(xOffset + width / 2, yOffset + height / 2, width / 2, height / 2);
-        StdDraw.setPenColor(StdDraw.WHITE);
-    }
 
     public void drawBackground(Color color) {
         StdDraw.setPenColor(color);
         StdDraw.filledSquare(.5, .5, 1f);
     }
 
-    public boolean getIsDrawing() {
-        return isDrawing;
-    }
-    /* Optimization thots
-     *  How to make it wait for drawing to finish before drawing again??
-     *  WE can draw background color rect over old pos then draw new one on top instead of redrawing
-     *  We can create some sort of object system that allows us to have rectangle objects and move functions
-     *  ^^ this would be good
-     */
-
-    //Use to redraw the array in the sorting functions (Requires double Buffering)
-    public void drawSortStep(int pauseTime, float[] arr,
-                             int taskNum, int taskTotal) {
-        clearQuadrant(taskNum, taskTotal);
-        drawArrayRects(arr, taskNum, taskTotal);
-        StdDraw.show();
-        StdDraw.pause(pauseTime);
-    }
-
-    public void selectionSort(float[] arr, int taskNum, int taskTotal) {
-        {
-            Clip sound = playSound(0);
-            int size = arr.length;
-
-            for (int i = 0; i < size - 1; i++) {
-                int minIndex = i;
-                for (int j = i + 1; j < size; j++) {
-                    if (arr[j] < arr[minIndex]) {
-                        minIndex = j;
-                    }
-                }
-                if (minIndex != i) {
-                    float temp = arr[i];
-                    arr[i] = arr[minIndex];
-                    arr[minIndex] = temp;
-                    sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[i]) * 100);
-                }
-                drawSortStep(0, arr, taskNum, taskTotal);
-            }
-            System.out.println("Selection Sort Finished\n");
+    public static int factorial(int n) {
+        if (n == 0) {
+            return 1;
         }
-    }
-    //Takes the height of the rectangle and converts it to a pitch range, -1 is the lowest pitch 1 is the highest pitch
-    //The array ranges from 0 to 1
-    public float convertArrayHeightToPitchRange ( float height){
-        return (height * 2) - 1;
-    }
-
-    public void bubbleSort ( float[] arr, int taskNum, int taskTotal){
-        Clip sound = playSound(0);
-        int size = arr.length;
-
-        for (int i = 0; i < size - 1; i++) {
-            for (int k = 0; k < size - i - 1; k++) {
-                if (arr[k] > arr[k + 1]) {
-                    float temp = arr[k];
-                    arr[k] = arr[k + 1];
-                    arr[k + 1] = temp;
-                    sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[k]));
-                }
-                drawSortStep(0, arr, taskNum, taskTotal);
-
-
-            }
-        }
-        System.out.println("Bubble Sort Finished\n");
-    }
-
-    public void angelSort(float[] arr, int taskNum, int taskTotal) {
-        Clip sound = playSound(0);
-        int size = arr.length;
-
-        while(!isSorted(arr))
-        {
-            for(int i = 0; i < size; i++)
-            {
-                if(rand.nextInt(2) == 0 && i < size - 1)
-                {
-                    float temp = arr[i];
-                    arr[i] = arr[i+1];
-                    arr[i+1] = temp;
-                    sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[i]));
-                }
-            }
-            drawSortStep(0, arr, taskNum, taskTotal);
-        }
-        System.out.println("Angel Sort Finished\n");
-    }
-
-    public static boolean isSorted(float[] a) {
-        for (int i = 0; i < a.length - 1; i++) {
-            if (a[i] > a[i + 1]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static int factorial(int n)
-    {
-        int res = 1, i;
-        for (i = 2; i <= n; i++)
-            res *= i;
-        return res;
+        return n * factorial(n - 1);
     }
 
     public static void printExpectedTime(SortType type, int size)
@@ -270,8 +126,12 @@ public class Sort {
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Set custom icon
+        ImageIcon icon = new ImageIcon("src/icon.png");
+        frame.setIconImage(icon.getImage());
+
         // Create a drop-down (JComboBox)
-        String[] types = {"Angel", "Bubble", "Selection"};
+        String[] types = {"Angel","Bubble", "Selection", "Quick"};
         JComboBox<String> typeDropDown = new JComboBox<>(types);
         typeDropDown.setToolTipText("Select a Sorting Algorithm");
 
@@ -327,9 +187,10 @@ public class Sort {
 
                     // Change the panel's background color based on selection
                     switch (Objects.requireNonNull(selectedType)) {
-                        case "Angel" -> type[0] = Sort.SortType.ANGEL;
-                        case "Bubble" -> type[0] = Sort.SortType.BUBBLE;
-                        case "Selection" -> type[0] = Sort.SortType.SELECTION;
+                        case "Angel" -> type[0] = SortType.ANGEL;
+                        case "Bubble" -> type[0] = SortType.BUBBLE;
+                        case "Selection" -> type[0] = SortType.SELECTION;
+                        case "Quick" -> type[0] = SortType.QUICK;
                     }
                 }
             });
