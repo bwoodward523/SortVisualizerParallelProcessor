@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Random;
 import javax.sound.sampled.*;
 import javax.swing.*;
+import javax.swing.ImageIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
@@ -22,7 +23,9 @@ public class Sort {
     public enum SortType {
         BUBBLE,
         SELECTION,
-        ANGEL
+        ANGEL,
+        QUICK,
+        RADIX
     }
 
     public void setSize(int s) {
@@ -129,171 +132,18 @@ public class Sort {
         StdDraw.setPenColor(new Color(red, green, blue));
     }
 
-    /*
-     * We should redraw only the rectangles that need to be redrawn to increase speed
-     * */
-    private void drawArrayRects(float[] arr, int taskNum,
-                                int taskTotal) {
-        int quadrant = taskNum % taskTotal;
-        int rows = (int) Math.sqrt(taskTotal);
-        int cols = (int) Math.ceil((double) taskTotal / rows);
-        int row = quadrant / cols;
-        int col = quadrant % cols;
 
-        float xOffset = (float) col / cols;
-        float yOffset = (float) row / rows;
-        float width = 1f / cols;
-        float height = 1f / rows;
-
-        int size = arr.length;
-        float rectWidth = width / size;
-        float offset = xOffset + rectWidth / 2;
-
-        for (int i = 0; i < size; i++) {
-            StdDraw.filledRectangle(offset, yOffset + arr[i] * height / 2, rectWidth / 2, arr[i] * height / 2);
-            offset += rectWidth;
-        }
-    }
-
-    private void clearQuadrant(int taskNum, int taskTotal) {
-        int quadrant = taskNum % taskTotal;
-        int rows = (int) Math.sqrt(taskTotal);
-        int cols = (int) Math.ceil((double) taskTotal / rows);
-        int row = quadrant / cols;
-        int col = quadrant % cols;
-
-        float xOffset = (float) col / cols;
-        float yOffset = (float) row / rows;
-        float width = 1f / cols;
-        float height = 1f / rows;
-
-        //int size = arr.length;
-        //float rectWidth = width / size;
-        //float offset = xOffset + rectWidth / 2;
-
-        StdDraw.setPenColor(StdDraw.BLACK);
-        StdDraw.filledRectangle(xOffset + width / 2, yOffset + height / 2, width / 2, height / 2);
-        StdDraw.setPenColor(StdDraw.WHITE);
-    }
 
     public void drawBackground(Color color) {
         StdDraw.setPenColor(color);
         StdDraw.filledSquare(.5, .5, 1f);
     }
 
-    public boolean getIsDrawing() {
-        return isDrawing;
-    }
-    /* Optimization thots
-     *  How to make it wait for drawing to finish before drawing again??
-     *  WE can draw background color rect over old pos then draw new one on top instead of redrawing
-     *  We can create some sort of object system that allows us to have rectangle objects and move functions
-     *  ^^ this would be good
-     */
-
-    //Use to redraw the array in the sorting functions (Requires double Buffering)
-    public void drawSortStep(int pauseTime, float[] arr,
-                             int taskNum, int taskTotal) {
-        clearQuadrant(taskNum, taskTotal);
-        drawArrayRects(arr, taskNum, taskTotal);
-        StdDraw.show();
-        StdDraw.pause(pauseTime);
-    }
-
-    public void selectionSort(float[] arr, int taskNum, int taskTotal) {
-        {
-            Clip sound = playSound(0, soundFile);
-            int size = arr.length;
-
-            for (int i = 0; i < size - 1; i++) {
-                int minIndex = i;
-                for (int j = i + 1; j < size; j++) {
-                    if (arr[j] < arr[minIndex]) {
-                        minIndex = j;
-                    }
-                }
-                if (minIndex != i) {
-                    float temp = arr[i];
-                    arr[i] = arr[minIndex];
-                    arr[minIndex] = temp;
-                    sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[i]) * 100, soundFile);
-                }
-                drawSortStep(0, arr, taskNum, taskTotal);
-            }
-            System.out.println("Selection Sort Finished\n");
+    public static int factorial(int n) {
+        if (n == 0) {
+            return 1;
         }
-    }
-    public void playSoundOnAllRects(){
-        for (int i = 0; i < size; i++){
-            playSound((arr[i])*2000, soundFile);
-            StdDraw.pause(20);
-        }
-    }
-    //Takes the height of the rectangle and converts it to a pitch range, -1 is the lowest pitch 1 is the highest pitch
-    //The array ranges from 0 to 1
-    public float convertArrayHeightToPitchRange ( float height){
-        return (height * 2) - 1;
-    }
-
-    public void bubbleSort ( float[] arr, int taskNum, int taskTotal){
-        Clip sound = playSound(0, soundFile);
-        int size = arr.length;
-
-        for (int i = 0; i < size - 1; i++) {
-            for (int k = 0; k < size - i - 1; k++) {
-                if (arr[k] > arr[k + 1]) {
-                    float temp = arr[k];
-                    arr[k] = arr[k + 1];
-                    arr[k + 1] = temp;
-                    sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[k]), soundFile);
-                }
-                drawSortStep(0, arr, taskNum, taskTotal);
-
-
-            }
-        }
-        System.out.println("Bubble Sort Finished\n");
-    }
-
-    public void angelSort(float[] arr, int taskNum, int taskTotal) {
-        Clip sound = playSound(0, soundFile);
-        int size = arr.length;
-
-        while(!isSorted(arr))
-        {
-            for(int i = 0; i < size; i++)
-            {
-                if(rand.nextInt(2) == 0 && i < size - 1)
-                {
-                    float temp = arr[i];
-                    arr[i] = arr[i+1];
-                    arr[i+1] = temp;
-                    sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[i]), soundFile);
-                }
-            }
-            drawSortStep(0, arr, taskNum, taskTotal);
-        }
-        System.out.println("Angel Sort Finished\n");
-    }
-
-    public static boolean isSorted(float[] a) {
-        for (int i = 0; i < a.length - 1; i++) {
-            if (a[i] > a[i + 1]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static int factorial(int n)
-    {
-        int res = 1, i;
-        for (i = 2; i <= n; i++)
-            res *= i;
-        return res;
+        return n * factorial(n - 1);
     }
 
     public static void printExpectedTime(SortType type, int size)
@@ -317,39 +167,69 @@ public class Sort {
         AtomicInteger breakVar = new AtomicInteger();
 
         // Create the main frame
-        JFrame frame = new JFrame("Drop-Down Example");
+        JFrame frame = new JFrame("Sorting Algorithm Visualizer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 800);
-        frame.setLayout(new FlowLayout());
+        frame.setLayout(new GridBagLayout());
+        frame.getContentPane().setBackground(Color.DARK_GRAY);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Set custom icon
+        ImageIcon icon = new ImageIcon("src/icon.png");
+        frame.setIconImage(icon.getImage());
 
         // Create a drop-down (JComboBox)
-        String[] types = {"Angel","Bubble", "Selection"};
+        String[] types = {"Angel","Bubble", "Selection", "Quick"};
         JComboBox<String> typeDropDown = new JComboBox<>(types);
-        JButton ejectButton = new JButton("Run");
-        frame.add(new JLabel("Select a Sorting Algorithm:"));
+        typeDropDown.setToolTipText("Select a Sorting Algorithm");
 
+        JLabel typeLabel = new JLabel("Select a Sorting Algorithm: ");
+        typeLabel.setForeground(Color.WHITE);
+
+        // Create labels and text fields
         JLabel nodeLabel = new JLabel("Enter how many nodes you want:");
-        // Create a text box (JTextField)
-        JTextField nodeBox = new JTextField(20); // 20 columns wide
+        nodeLabel.setForeground(Color.WHITE);
+        JTextField nodeBox = new JTextField(20);
 
-        JLabel coreLabel = new JLabel("Enter how many cores do you want to use:");
-        JTextField coreBox = new JTextField(20); // 20 columns wide
+        JLabel coreLabel = new JLabel("Enter how many cores you want to use:");
+        coreLabel.setForeground(Color.WHITE);
+        JTextField coreBox = new JTextField(20);
 
-        frame.add(typeDropDown);
-        frame.add(ejectButton);
-        frame.add(nodeLabel);
-        frame.add(nodeBox);
-        frame.add(coreLabel);
-        frame.add(coreBox);
+        JButton ejectButton = new JButton("Run");
 
+        // Add components to the frame
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        frame.add(typeLabel, gbc);
 
+        gbc.gridx = 1;
+        frame.add(typeDropDown, gbc);
 
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        frame.add(nodeLabel, gbc);
+
+        gbc.gridx = 1;
+        frame.add(nodeBox, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        frame.add(coreLabel, gbc);
+
+        gbc.gridx = 1;
+        frame.add(coreBox, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        frame.add(ejectButton, gbc);
 
         // Make the frame visible
         frame.setVisible(true);
 
-
-        while(breakVar.get() != 1){
+        while (breakVar.get() != 1) {
             // Add an ActionListener to handle selection changes
             typeDropDown.addActionListener(new ActionListener() {
                 @Override
@@ -361,6 +241,7 @@ public class Sort {
                         case "Angel" -> type[0] = SortType.ANGEL;
                         case "Bubble" -> type[0] = SortType.BUBBLE;
                         case "Selection" -> type[0] = SortType.SELECTION;
+                        case "Quick" -> type[0] = SortType.QUICK;
                     }
                 }
             });
@@ -394,8 +275,12 @@ public class Sort {
         sorter.setRandomPenColor();
 
         // Setup Parrallel Processing
+        //processor.setupTasks(total[0], sorter.arr, type[0]);
+        //processor.startThreads(sorter.arr, type[0]);
+
+        //sorter.drawArrayRects(sorter.arr, 0, 1);
         printExpectedTime(type[0], size[0]);
-        processor.setupTasks(total[0], sorter.arr, type[0]);    
+        processor.setupTasks(total[0], sorter.arr, type[0]);
 
         StdDraw.pause(1000);
         sorter.playSoundOnAllRects();
