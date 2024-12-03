@@ -20,7 +20,8 @@ public class Sort {
         SELECTION,
         ANGEL,
         QUICK,
-        RADIX
+        CYCLE,
+        MERGE
     }
 
     public void setSize(int s) {
@@ -48,29 +49,7 @@ public class Sort {
             }
         }
     }
-
-    private Clip playSound(float pitch) {
-        try {
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource("laserShoot.wav"));
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-            clip.start();
-            AudioFormat baseFormat = audioInputStream.getFormat();
-            AudioFormat newFormat = new AudioFormat(
-                    baseFormat.getEncoding(),
-                    baseFormat.getSampleRate() * pitch,
-                    baseFormat.getSampleSizeInBits(),
-                    baseFormat.getChannels(),
-                    baseFormat.getFrameSize(),
-                    baseFormat.getFrameRate() * pitch,
-                    baseFormat.isBigEndian()
-            );
-            return clip;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+    
 
     private void setRandomPenColor() {
         int red = (int) (Math.random() * 256);
@@ -131,7 +110,7 @@ public class Sort {
         frame.setIconImage(icon.getImage());
 
         // Create a drop-down (JComboBox)
-        String[] types = {"Angel","Bubble", "Selection", "Quick"};
+        String[] types = {"Angel","Bubble", "Selection", "Quick", "Cycle"};
         JComboBox<String> typeDropDown = new JComboBox<>(types);
         typeDropDown.setToolTipText("Select a Sorting Algorithm");
 
@@ -191,6 +170,8 @@ public class Sort {
                         case "Bubble" -> type[0] = SortType.BUBBLE;
                         case "Selection" -> type[0] = SortType.SELECTION;
                         case "Quick" -> type[0] = SortType.QUICK;
+                        case "Cycle" -> type[0] = SortType.CYCLE;
+                        case "Merge" -> type[0] = SortType.MERGE;
                     }
                 }
             });

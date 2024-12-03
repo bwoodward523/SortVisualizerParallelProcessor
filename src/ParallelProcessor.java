@@ -32,6 +32,12 @@ public class ParallelProcessor {
                     case QUICK:
                         alg.quickSort(subArray, 0, subArray.length - 1, finalI, taskNum);
                         break;
+                    case CYCLE:
+                        alg.cycleSort(subArray, finalI, taskNum);
+                        break;
+                    case MERGE:
+                        alg.mergeSort(subArray, finalI, taskNum);
+                        break;
                 }
                 sortedSubArrays[finalI] = subArray;
             });
