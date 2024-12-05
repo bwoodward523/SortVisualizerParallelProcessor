@@ -3,10 +3,14 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import java.awt.*;
+import java.io.*;
 import java.util.Random;
+
 import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
-import be.tarsos.dsp.pitch.PitchShifter;
+import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
+import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.writer.WriterProcessor;
 
 import javax.sound.sampled.AudioFormat;
@@ -17,33 +21,65 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 public class SortingAlgorithms {
     private Random rand = new Random();
 
     // Sound Methods
-    private Clip playSound(float pitch) {
-        try {
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource("laserShoot.wav"));
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-            clip.start();
-            AudioFormat baseFormat = audioInputStream.getFormat();
-            AudioFormat newFormat = new AudioFormat(
-                    baseFormat.getEncoding(),
-                    baseFormat.getSampleRate() * (float)Math.random() * 10000.0f,
-                    baseFormat.getSampleSizeInBits(),
-                    baseFormat.getChannels(),
-                    baseFormat.getFrameSize(),
-                    baseFormat.getFrameRate() * pitch,
-                    baseFormat.isBigEndian()
-            );
-            return clip;
-        } catch (Exception e) {
-            e.printStackTrace();
+    static File inputFile = new File("src/sounds/hitHurt.wav");
+    static File[] soundFiles = new File[100];
+    void GenerateSoundFiles() {
+        for (int i = 0; i < 100; i++) {
+            soundFiles[i] = new File("src/sounds/hitHurt" + i + ".wav");
         }
-        return null;
     }
+    private static void changePitch(File outputFile, float pitchShiftFactor) throws Exception {
+        AudioInputStream inputStream = AudioSystem.getAudioInputStream(inputFile);
+        AudioFormat format = inputStream.getFormat();
+
+        AudioDispatcher dispatcher = AudioDispatcherFactory.fromPipe(
+                inputFile.getAbsolutePath(), (int)format.getSampleRate(), 1024, 0);
+        dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, format.getSampleRate(), 1024, (pitchDetectionResult, audioEvent) -> {
+            float pitch = pitchDetectionResult.getPitch();
+            if (pitch != -1) {
+                audioEvent.setFloatBuffer(audioEvent.getFloatBuffer());
+            }
+        }));
+
+        // Convert AudioFormat to TarsosDSPAudioFormat
+        TarsosDSPAudioFormat tarsosFormat = JVMAudioInputStream.toTarsosDSPFormat(format);
+
+        dispatcher.addAudioProcessor(new WriterProcessor(tarsosFormat, new RandomAccessFile(outputFile, "rw")));
+        dispatcher.run();
+    }
+    private static void playSound(File file) throws Exception {
+        Clip clip = AudioSystem.getClip();
+        clip.open(AudioSystem.getAudioInputStream(file));
+        clip.start();
+        //Thread.sleep(clip.getMicrosecondLength() / 1000);
+    }
+
+
+//        try {
+//            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource("laserShoot.wav"));
+//            Clip clip = AudioSystem.getClip();
+//            clip.open(audioInputStream);
+//            clip.start();
+//            AudioFormat baseFormat = audioInputStream.getFormat();
+//            AudioFormat newFormat = new AudioFormat(
+//                    baseFormat.getEncoding(),
+//                    baseFormat.getSampleRate() * (float)Math.random() * 10000.0f,
+//                    baseFormat.getSampleSizeInBits(),
+//                    baseFormat.getChannels(),
+//                    baseFormat.getFrameSize(),
+//                    baseFormat.getFrameRate() * pitch,
+//                    baseFormat.isBigEndian()
+//            );
+//            return clip;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
     public float convertArrayHeightToPitchRange(float height) {
         return (height * 2) - 1;
@@ -52,7 +88,7 @@ public class SortingAlgorithms {
 
     // Sorting Algorithms
     public void selectionSort(float[] arr, int taskNum, int taskTotal) {
-        Clip sound = playSound(0);
+        //Clip sound = playSound(0);
         int size = arr.length;
 
         for (int i = 0; i < size - 1; i++) {
@@ -66,8 +102,15 @@ public class SortingAlgorithms {
                 float temp = arr[i];
                 arr[i] = arr[minIndex];
                 arr[minIndex] = temp;
-                sound.stop();
-                sound = playSound(convertArrayHeightToPitchRange(arr[i]) * 100);
+                //sound.stop();
+                //sound = playSound(convertArrayHeightToPitchRange(arr[i]) * 100);
+                int fractionalPosition = (i / size) * 100;
+                try {
+                    playSound(soundFiles[fractionalPosition]);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             }
             drawSortStep(2, arr, taskNum, taskTotal);
         }
@@ -75,7 +118,7 @@ public class SortingAlgorithms {
     }
 
     public void bubbleSort(float[] arr, int taskNum, int taskTotal) {
-        Clip sound = playSound(0);
+        //Clip sound = playSound(0);
         int size = arr.length;
 
         for (int i = 0; i < size - 1; i++) {
@@ -84,8 +127,14 @@ public class SortingAlgorithms {
                     float temp = arr[k];
                     arr[k] = arr[k + 1];
                     arr[k + 1] = temp;
-                    sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                    // sound.stop();
+                    //sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                    int fractionalPosition = (k / size) * 100;
+                    try {
+                        playSound(soundFiles[fractionalPosition]);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
                 drawSortStep(0, arr, taskNum, taskTotal);
             }
@@ -94,7 +143,7 @@ public class SortingAlgorithms {
     }
 
     public void angelSort(float[] arr, int taskNum, int taskTotal) {
-        Clip sound = playSound(0);
+        //Clip sound = playSound(0);
         int size = arr.length;
 
         while (!isSorted(arr)) {
@@ -103,8 +152,14 @@ public class SortingAlgorithms {
                     float temp = arr[i];
                     arr[i] = arr[i + 1];
                     arr[i + 1] = temp;
-                    sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[i]));
+                    // sound.stop();
+                    //sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                    int fractionalPosition = (i / size) * 100;
+                    try {
+                        playSound(soundFiles[fractionalPosition]);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
             drawSortStep(0, arr, taskNum, taskTotal);
@@ -123,7 +178,7 @@ public class SortingAlgorithms {
 
     public void cycleSort(float[] arr, int taskNum, int taskTotal)
     {
-        Clip sound = playSound(0);
+        //Clip sound = playSound(0);
         int size = arr.length;
         for(int cycle_start = 0; cycle_start <= size-2; cycle_start++)
         {
@@ -149,8 +204,14 @@ public class SortingAlgorithms {
                 float temp = item;
                 item = arr[pos];
                 arr[pos] = temp;
-                sound.stop();
-                sound = playSound(convertArrayHeightToPitchRange(arr[pos]));
+                // sound.stop();
+                //sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                int fractionalPosition = (pos / size) * 100;
+                try {
+                    playSound(soundFiles[fractionalPosition]);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
             while(pos != cycle_start)
             {
@@ -171,15 +232,21 @@ public class SortingAlgorithms {
                     float temp = item;
                     item = arr[pos];
                     arr[pos] = temp;
-                    sound.stop();
-                    sound = playSound(convertArrayHeightToPitchRange(arr[pos]));
+                    // sound.stop();
+                    //sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                    int fractionalPosition = (pos / size) * 100;
+                    try {
+                        playSound(soundFiles[fractionalPosition]);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
             drawSortStep(0, arr, taskNum, taskTotal);
         }
     }
     public void mergeSort(float[] arr, int taskNum, int taskTotal) {
-        Clip sound = playSound(0);
+        //Clip sound = playSound(0);
         int size = arr.length;
         if (size > 1) {
             int mid = size / 2;
@@ -205,8 +272,14 @@ public class SortingAlgorithms {
                     j++;
                 }
                 k++;
-                sound.stop();
-                sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                // sound.stop();
+                //sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                int fractionalPosition = (k / size) * 100;
+                try {
+                    playSound(soundFiles[fractionalPosition]);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 drawSortStep(0, arr, taskNum, taskTotal);
             }
 
@@ -214,8 +287,14 @@ public class SortingAlgorithms {
                 arr[k] = left[i];
                 i++;
                 k++;
-                sound.stop();
-                sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                // sound.stop();
+                //sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                int fractionalPosition = (k / size) * 100;
+                try {
+                    playSound(soundFiles[fractionalPosition]);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 drawSortStep(0, arr, taskNum, taskTotal);
             }
 
@@ -223,8 +302,14 @@ public class SortingAlgorithms {
                 arr[k] = right[j];
                 j++;
                 k++;
-                sound.stop();
-                sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                // sound.stop();
+                //sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                int fractionalPosition = (k / size) * 100;
+                try {
+                    playSound(soundFiles[fractionalPosition]);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 drawSortStep(0, arr, taskNum, taskTotal);
             }
         }
@@ -245,7 +330,7 @@ public class SortingAlgorithms {
         return max;
     }
     private int partition(float arr[], int begin, int end, int taskNum, int taskTotal) {
-        Clip sound = playSound(0);
+       // Clip sound = playSound(0);
         float pivot = arr[end];
         int i = (begin - 1);
 
@@ -256,8 +341,14 @@ public class SortingAlgorithms {
                 float swapTemp = arr[i];
                 arr[i] = arr[j];
                 arr[j] = swapTemp;
-                sound.stop();
-                sound = playSound(convertArrayHeightToPitchRange(arr[i]));
+                // sound.stop();
+                //sound = playSound(convertArrayHeightToPitchRange(arr[i]));
+                int fractionalPosition = (i / end) * 100;
+                try {
+                    playSound(soundFiles[fractionalPosition]);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
             drawSortStep(0, arr, taskNum, taskTotal);
         }
