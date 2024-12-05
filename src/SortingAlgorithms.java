@@ -4,6 +4,19 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import java.awt.*;
 import java.util.Random;
+import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
+import be.tarsos.dsp.pitch.PitchShifter;
+import be.tarsos.dsp.writer.WriterProcessor;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class SortingAlgorithms {
     private Random rand = new Random();
@@ -18,7 +31,7 @@ public class SortingAlgorithms {
             AudioFormat baseFormat = audioInputStream.getFormat();
             AudioFormat newFormat = new AudioFormat(
                     baseFormat.getEncoding(),
-                    baseFormat.getSampleRate() * pitch,
+                    baseFormat.getSampleRate() * (float)Math.random() * 10000.0f,
                     baseFormat.getSampleSizeInBits(),
                     baseFormat.getChannels(),
                     baseFormat.getFrameSize(),
