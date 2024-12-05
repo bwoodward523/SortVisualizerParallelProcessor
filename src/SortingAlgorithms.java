@@ -121,6 +121,115 @@ public class SortingAlgorithms {
         }
     }
 
+    public void cycleSort(float[] arr, int taskNum, int taskTotal)
+    {
+        Clip sound = playSound(0);
+        int size = arr.length;
+        for(int cycle_start = 0; cycle_start <= size-2; cycle_start++)
+        {
+            float item = arr[cycle_start];
+            int pos = cycle_start;
+            for(int i = cycle_start+1; i<size; i++)
+            {
+                if(arr[i] < item)
+                {
+                    pos++;
+                }
+            }
+            if(pos == cycle_start)
+            {
+                continue;
+            }
+            while(item == arr[pos])
+            {
+                pos += 1;
+            }
+            if(pos != cycle_start)
+            {
+                float temp = item;
+                item = arr[pos];
+                arr[pos] = temp;
+                sound.stop();
+                sound = playSound(convertArrayHeightToPitchRange(arr[pos]));
+            }
+            while(pos != cycle_start)
+            {
+                pos = cycle_start;
+                for(int i = cycle_start+1; i<size; i++)
+                {
+                    if(arr[i] < item)
+                    {
+                        pos += 1;
+                    }
+                }
+                while(item == arr[pos])
+                {
+                    pos += 1;
+                }
+                if(item != arr[pos])
+                {
+                    float temp = item;
+                    item = arr[pos];
+                    arr[pos] = temp;
+                    sound.stop();
+                    sound = playSound(convertArrayHeightToPitchRange(arr[pos]));
+                }
+            }
+            drawSortStep(0, arr, taskNum, taskTotal);
+        }
+    }
+    public void mergeSort(float[] arr, int taskNum, int taskTotal) {
+        Clip sound = playSound(0);
+        int size = arr.length;
+        if (size > 1) {
+            int mid = size / 2;
+            float[] left = new float[mid];
+            float[] right = new float[size - mid];
+
+            System.arraycopy(arr, 0, left, 0, mid);
+            System.arraycopy(arr, mid, right, 0, size - mid);
+
+            mergeSort(left, taskNum, taskTotal);
+            mergeSort(right, taskNum, taskTotal);
+
+            int i = 0;
+            int j = 0;
+            int k = 0;
+
+            while (i < left.length && j < right.length) {
+                if (left[i] < right[j]) {
+                    arr[k] = left[i];
+                    i++;
+                } else {
+                    arr[k] = right[j];
+                    j++;
+                }
+                k++;
+                sound.stop();
+                sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                drawSortStep(0, arr, taskNum, taskTotal);
+            }
+
+            while (i < left.length) {
+                arr[k] = left[i];
+                i++;
+                k++;
+                sound.stop();
+                sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                drawSortStep(0, arr, taskNum, taskTotal);
+            }
+
+            while (j < right.length) {
+                arr[k] = right[j];
+                j++;
+                k++;
+                sound.stop();
+                sound = playSound(convertArrayHeightToPitchRange(arr[k]));
+                drawSortStep(0, arr, taskNum, taskTotal);
+            }
+        }
+    }
+
 
 
     // Utility Methods for Sorting Algorithms

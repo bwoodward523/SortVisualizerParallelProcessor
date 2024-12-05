@@ -25,7 +25,8 @@ public class Sort {
         SELECTION,
         ANGEL,
         QUICK,
-        RADIX
+        CYCLE,
+        MERGE
     }
 
     public void setSize(int s) {
@@ -53,7 +54,6 @@ public class Sort {
             }
         }
     }
-
 
 
     private void setRandomPenColor() {
@@ -115,7 +115,7 @@ public class Sort {
         frame.setIconImage(icon.getImage());
 
         // Create a drop-down (JComboBox)
-        String[] types = {"Angel","Bubble", "Selection", "Quick"};
+        String[] types = {"Angel","Bubble", "Selection", "Quick", "Cycle"};
         JComboBox<String> typeDropDown = new JComboBox<>(types);
         typeDropDown.setToolTipText("Select a Sorting Algorithm");
 
@@ -175,6 +175,8 @@ public class Sort {
                         case "Bubble" -> type[0] = SortType.BUBBLE;
                         case "Selection" -> type[0] = SortType.SELECTION;
                         case "Quick" -> type[0] = SortType.QUICK;
+                        case "Cycle" -> type[0] = SortType.CYCLE;
+                        case "Merge" -> type[0] = SortType.MERGE;
                     }
                 }
             });
