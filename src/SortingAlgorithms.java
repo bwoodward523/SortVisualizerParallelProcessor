@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.Random;
 
 import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.PitchShifter;
 import be.tarsos.dsp.io.TarsosDSPAudioFormat;
 import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
 import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
@@ -18,6 +19,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import java.io.File;
+import java.io.RandomAccessFile;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,11 +27,28 @@ public class SortingAlgorithms {
     private Random rand = new Random();
 
     // Sound Methods
-    static File inputFile = new File("src/sounds/hitHurt.wav");
+    static File inputFile = new File("src/sounds/longsound.wav");
     static File[] soundFiles = new File[100];
+
     void GenerateSoundFiles() {
-        for (int i = 0; i < 100; i++) {
-            soundFiles[i] = new File("src/sounds/hitHurt" + i + ".wav");
+        System.out.println(inputFile.getAbsolutePath());
+        for (int i = 0; i < 2; i++) {
+            float pitchShiftFactor;
+            if (i < 50) {
+                pitchShiftFactor = 1.0f - (50 - i) * 0.02f; // Lower pitch
+            } else if (i == 50) {
+                pitchShiftFactor = 1.0f; // Original pitch
+            } else {
+                pitchShiftFactor = 1.0f + (i - 50) * 0.02f; // Higher pitch
+            }
+            File outputFile = new File("src/sounds/longsound" + i + ".wav");
+            try {
+                changePitch(outputFile, pitchShiftFactor);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            soundFiles[i] = outputFile;
+            soundFiles[i] = new File("src/sounds/longsound" + i + ".wav");
         }
     }
     private static void changePitch(File outputFile, float pitchShiftFactor) throws Exception {
@@ -38,12 +57,8 @@ public class SortingAlgorithms {
 
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromPipe(
                 inputFile.getAbsolutePath(), (int)format.getSampleRate(), 1024, 0);
-        dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, format.getSampleRate(), 1024, (pitchDetectionResult, audioEvent) -> {
-            float pitch = pitchDetectionResult.getPitch();
-            if (pitch != -1) {
-                audioEvent.setFloatBuffer(audioEvent.getFloatBuffer());
-            }
-        }));
+        // Apply pitch shifting
+        dispatcher.addAudioProcessor(new PitchShifter(pitchShiftFactor, format.getSampleRate(), 1024, 256));
 
         // Convert AudioFormat to TarsosDSPAudioFormat
         TarsosDSPAudioFormat tarsosFormat = JVMAudioInputStream.toTarsosDSPFormat(format);
@@ -55,7 +70,7 @@ public class SortingAlgorithms {
         Clip clip = AudioSystem.getClip();
         clip.open(AudioSystem.getAudioInputStream(file));
         clip.start();
-        //Thread.sleep(clip.getMicrosecondLength() / 1000);
+        Thread.sleep(clip.getMicrosecondLength() / 1000);
     }
 
 
