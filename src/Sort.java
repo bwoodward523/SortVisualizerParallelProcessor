@@ -96,7 +96,7 @@ public class Sort {
         double result = 0;
         switch (type) {
             case BUBBLE, SELECTION -> {
-                result = ((double) (size ^ 2) / (100 ^ 2)) * 0.01;
+                result = ((double) (size ^ 2) / (100 ^ 2))*3;
             }
             case ANGEL,QUICK,MERGE -> {
                 result = ((double)size * (factorial(size))) * 0.01;
