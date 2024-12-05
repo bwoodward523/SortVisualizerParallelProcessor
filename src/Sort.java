@@ -3,6 +3,8 @@ import java.util.Random;
 import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.ImageIcon;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
@@ -88,6 +90,24 @@ public class Sort {
         }
     }
 
+    public static double calculateExpectedTime(SortType type, int size)
+    {
+        //BUBBLE,SELECTION,ANGEL,QUICK,CYCLE,MERGE
+        double result = 0;
+        switch (type) {
+            case BUBBLE, SELECTION -> {
+                result = ((double) (size ^ 2) / (100 ^ 2)) * 0.01;
+            }
+            case ANGEL,QUICK,MERGE -> {
+                result = ((double)size * (factorial(size))) * 0.01;
+            }
+            case CYCLE -> {
+                result = ((double)size) * 0.01;
+            }
+        }
+        return result;
+    }
+
     public static void main (String[]args){
         final int[] total = {1};
         final SortType[] type = {SortType.ANGEL};
@@ -110,7 +130,7 @@ public class Sort {
         frame.setIconImage(icon.getImage());
 
         // Create a drop-down (JComboBox)
-        String[] types = {"Angel","Bubble", "Selection", "Quick", "Cycle"};
+        String[] types = {"Angel", "Bubble", "Selection", "Quick", "Cycle", "Merge"};
         JComboBox<String> typeDropDown = new JComboBox<>(types);
         typeDropDown.setToolTipText("Select a Sorting Algorithm");
 
@@ -125,6 +145,11 @@ public class Sort {
         JLabel coreLabel = new JLabel("Enter how many cores you want to use:");
         coreLabel.setForeground(Color.WHITE);
         JTextField coreBox = new JTextField(20);
+
+        JLabel timeLabel = new JLabel("Estimated time: ");
+        timeLabel.setForeground(Color.WHITE);
+        JTextField estimatedTimeBox = new JTextField(20);
+        estimatedTimeBox.setEditable(false);
 
         JButton ejectButton = new JButton("Run");
 
@@ -150,39 +175,59 @@ public class Sort {
         gbc.gridx = 1;
         frame.add(coreBox, gbc);
 
-        gbc.gridx = 1;
+        gbc.gridx = 0;
         gbc.gridy = 3;
+        frame.add(timeLabel, gbc);
+
+        gbc.gridx = 1;
+        frame.add(estimatedTimeBox, gbc);
+
+        gbc.gridx = 1;
+        gbc.gridy = 4;
         frame.add(ejectButton, gbc);
 
         // Make the frame visible
         frame.setVisible(true);
 
-        while (breakVar.get() != 1) {
-            // Add an ActionListener to handle selection changes
-            typeDropDown.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    String selectedType = (String) typeDropDown.getSelectedItem();
+        // Add listeners to update the estimatedTimeBox
+        typeDropDown.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateEstimatedTime(typeDropDown, nodeBox, estimatedTimeBox, type);
+            }
+        });
 
-                    // Change the panel's background color based on selection
-                    switch (Objects.requireNonNull(selectedType)) {
-                        case "Angel" -> type[0] = SortType.ANGEL;
-                        case "Bubble" -> type[0] = SortType.BUBBLE;
-                        case "Selection" -> type[0] = SortType.SELECTION;
-                        case "Quick" -> type[0] = SortType.QUICK;
-                        case "Cycle" -> type[0] = SortType.CYCLE;
-                        case "Merge" -> type[0] = SortType.MERGE;
-                    }
-                }
-            });
-            ejectButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    breakVar.set(1);
-                    size[0] = Integer.parseInt(nodeBox.getText()); // Get text from the text box
-                    total[0] = Integer.parseInt(coreBox.getText());
-                }
-            });
+        DocumentListener documentListener = new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateEstimatedTime(typeDropDown, nodeBox, estimatedTimeBox, type);
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateEstimatedTime(typeDropDown, nodeBox, estimatedTimeBox, type);
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateEstimatedTime(typeDropDown, nodeBox, estimatedTimeBox, type);
+            }
+        };
+
+        nodeBox.getDocument().addDocumentListener(documentListener);
+        coreBox.getDocument().addDocumentListener(documentListener);
+
+        ejectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                breakVar.set(1);
+                size[0] = Integer.parseInt(nodeBox.getText()); // Get text from the text box
+                total[0] = Integer.parseInt(coreBox.getText());
+            }
+        });
+
+        while (breakVar.get() != 1) {
+            // Keep the frame running
         }
         frame.dispose();
 
@@ -214,6 +259,23 @@ public class Sort {
 
         sorter.setRandomPenColor();
         //sorter.drawArrayRects(sorter.arr);
+    }
+
+    private static void updateEstimatedTime(JComboBox<String> typeDropDown, JTextField nodeBox, JTextField estimatedTimeBox, SortType[] type) {
+        String selectedType = (String) typeDropDown.getSelectedItem();
+        if (selectedType != null && !nodeBox.getText().isEmpty()) {
+            int nodeCount = Integer.parseInt(nodeBox.getText());
+            switch (Objects.requireNonNull(selectedType)) {
+                case "Angel" -> type[0] = SortType.ANGEL;
+                case "Bubble" -> type[0] = SortType.BUBBLE;
+                case "Selection" -> type[0] = SortType.SELECTION;
+                case "Quick" -> type[0] = SortType.QUICK;
+                case "Cycle" -> type[0] = SortType.CYCLE;
+                case "Merge" -> type[0] = SortType.MERGE;
+            }
+            double estimatedTime = calculateExpectedTime(type[0], nodeCount);
+            estimatedTimeBox.setText(estimatedTime + " seconds");
+        }
     }
 
 
