@@ -4,101 +4,64 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import java.awt.*;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-
-import be.tarsos.dsp.AudioDispatcher;
-import be.tarsos.dsp.PitchShifter;
-import be.tarsos.dsp.io.TarsosDSPAudioFormat;
-import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
-import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
-import be.tarsos.dsp.pitch.PitchProcessor;
-import be.tarsos.dsp.writer.WriterProcessor;
-
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import java.io.File;
-import java.io.RandomAccessFile;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 public class SortingAlgorithms {
     private Random rand = new Random();
+    private static List<Clip> currentlyPlayingSounds = new ArrayList<>();
 
     // Sound Methods
     static File inputFile = new File("src/sounds/longsound.wav");
     static File[] soundFiles = new File[100];
+    void InitializeSoundFiles() {
+        File folder = new File("src/sounds/generated_wavs");
+        File[] files = folder.listFiles((dir, name) -> name.endsWith(".wav"));
 
-    void GenerateSoundFiles() {
-        System.out.println(inputFile.getAbsolutePath());
-        for (int i = 0; i < 2; i++) {
-            float pitchShiftFactor;
-            if (i < 50) {
-                pitchShiftFactor = 1.0f - (50 - i) * 0.02f; // Lower pitch
-            } else if (i == 50) {
-                pitchShiftFactor = 1.0f; // Original pitch
-            } else {
-                pitchShiftFactor = 1.0f + (i - 50) * 0.02f; // Higher pitch
+        if (files != null && files.length >= 100) {
+            for (int i = 0; i < 100; i++) {
+                soundFiles[i] = files[i];
             }
-            File outputFile = new File("src/sounds/longsound" + i + ".wav");
+        } else {
+            throw new RuntimeException("Not enough .wav files in the directory");
+        }
+    }
+    public void endOfSort(float[] arr) {
+        for (int i = 0; i < arr.length; i++) {
+            float fractionalPosition = ((float) i / (float)arr.length) * 100.0f;            StdDraw.setPenColor(StdDraw.RED);
+           // System.out.println("Playing sound at position: " + fractionalPosition + " i is" + i);
+           // System.out.println("" + arr.length);
+
             try {
-                changePitch(outputFile, pitchShiftFactor);
+                Thread.sleep(1/arr.length * 1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                playSound(soundFiles[(int)fractionalPosition]);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            soundFiles[i] = outputFile;
-            soundFiles[i] = new File("src/sounds/longsound" + i + ".wav");
         }
-    }
-    private static void changePitch(File outputFile, float pitchShiftFactor) throws Exception {
-        AudioInputStream inputStream = AudioSystem.getAudioInputStream(inputFile);
-        AudioFormat format = inputStream.getFormat();
+        float pauseTime = 1.0f/ (float)arr.length * 1000.0f;
+        drawSortStep( 2, arr,1,1, Color.BLUE);
+        System.out.println("what are you doing dummie");
 
-        AudioDispatcher dispatcher = AudioDispatcherFactory.fromPipe(
-                inputFile.getAbsolutePath(), (int)format.getSampleRate(), 1024, 0);
-        // Apply pitch shifting
-        dispatcher.addAudioProcessor(new PitchShifter(pitchShiftFactor, format.getSampleRate(), 1024, 256));
-
-        // Convert AudioFormat to TarsosDSPAudioFormat
-        TarsosDSPAudioFormat tarsosFormat = JVMAudioInputStream.toTarsosDSPFormat(format);
-
-        dispatcher.addAudioProcessor(new WriterProcessor(tarsosFormat, new RandomAccessFile(outputFile, "rw")));
-        dispatcher.run();
     }
     private static void playSound(File file) throws Exception {
         Clip clip = AudioSystem.getClip();
         clip.open(AudioSystem.getAudioInputStream(file));
         clip.start();
-        Thread.sleep(clip.getMicrosecondLength() / 1000);
+        for(Clip c : currentlyPlayingSounds) {
+            if(c.getMicrosecondPosition() > 200){
+                c.stop();
+            }
+        }
+        currentlyPlayingSounds.add(clip);
+        //Thread.sleep(clip.getMicrosecondLength() / 1000);
     }
 
-
-//        try {
-//            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource("laserShoot.wav"));
-//            Clip clip = AudioSystem.getClip();
-//            clip.open(audioInputStream);
-//            clip.start();
-//            AudioFormat baseFormat = audioInputStream.getFormat();
-//            AudioFormat newFormat = new AudioFormat(
-//                    baseFormat.getEncoding(),
-//                    baseFormat.getSampleRate() * (float)Math.random() * 10000.0f,
-//                    baseFormat.getSampleSizeInBits(),
-//                    baseFormat.getChannels(),
-//                    baseFormat.getFrameSize(),
-//                    baseFormat.getFrameRate() * pitch,
-//                    baseFormat.isBigEndian()
-//            );
-//            return clip;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
-
-    public float convertArrayHeightToPitchRange(float height) {
-        return (height * 2) - 1;
-    }
 
 
     // Sorting Algorithms
@@ -117,8 +80,6 @@ public class SortingAlgorithms {
                 float temp = arr[i];
                 arr[i] = arr[minIndex];
                 arr[minIndex] = temp;
-                //sound.stop();
-                //sound = playSound(convertArrayHeightToPitchRange(arr[i]) * 100);
                 int fractionalPosition = (i / size) * 100;
                 try {
                     playSound(soundFiles[fractionalPosition]);
@@ -127,9 +88,10 @@ public class SortingAlgorithms {
                 }
 
             }
-            drawSortStep(2, arr, taskNum, taskTotal);
+            drawSortStep(0, arr, taskNum, taskTotal);
         }
         System.out.println("Selection Sort Finished\n");
+        endOfSort(arr);
     }
 
     public void bubbleSort(float[] arr, int taskNum, int taskTotal) {
@@ -155,6 +117,8 @@ public class SortingAlgorithms {
             }
         }
         System.out.println("Bubble Sort Finished\n");
+        //endOfSort(arr);
+
     }
 
     public void angelSort(float[] arr, int taskNum, int taskTotal) {
@@ -180,6 +144,8 @@ public class SortingAlgorithms {
             drawSortStep(0, arr, taskNum, taskTotal);
         }
         System.out.println("Angel Sort Finished\n");
+     //   endOfSort(arr);
+
     }
 
     public void quickSort(float arr[], int begin, int end, int taskNum, int taskTotal) {
@@ -259,6 +225,8 @@ public class SortingAlgorithms {
             }
             drawSortStep(0, arr, taskNum, taskTotal);
         }
+      //  endOfSort(arr);
+
     }
     public void mergeSort(float[] arr, int taskNum, int taskTotal) {
         //Clip sound = playSound(0);
@@ -328,6 +296,7 @@ public class SortingAlgorithms {
                 drawSortStep(0, arr, taskNum, taskTotal);
             }
         }
+    //    endOfSort(arr);
     }
 
 
@@ -387,7 +356,7 @@ public class SortingAlgorithms {
 
 
     // Redraw Methods for Sorting Algorithms
-    private void clearQuadrant(int taskNum, int taskTotal) {
+    private void clearQuadrant(int taskNum, int taskTotal, Color color) {
         int quadrant = taskNum % taskTotal;
         int rows = (int) Math.sqrt(taskTotal);
         int cols = (int) Math.ceil((double) taskTotal / rows);
@@ -405,10 +374,10 @@ public class SortingAlgorithms {
 
         StdDraw.setPenColor(StdDraw.BLACK);
         StdDraw.filledRectangle(xOffset + width / 2, yOffset + height / 2, width / 2, height / 2);
-        StdDraw.setPenColor(StdDraw.WHITE);
+        StdDraw.setPenColor(color);
     }
     private void drawArrayRects(float[] arr, int taskNum,
-                                int taskTotal) {
+                                int taskTotal, int pauseTime) {
         int quadrant = taskNum % taskTotal;
         int rows = (int) Math.sqrt(taskTotal);
         int cols = (int) Math.ceil((double) taskTotal / rows);
@@ -427,6 +396,7 @@ public class SortingAlgorithms {
         for (int i = 0; i < size; i++) {
             StdDraw.filledRectangle(offset, yOffset + arr[i] * height / 2, rectWidth / 2, arr[i] * height / 2);
             offset += rectWidth;
+            StdDraw.pause(pauseTime);
         }
     }
     public void drawBackground(Color color) {
@@ -438,9 +408,15 @@ public class SortingAlgorithms {
     //Use to redraw the array in the sorting functions (Requires double Buffering)
     public void drawSortStep(int pauseTime, float[] arr,
                              int taskNum, int taskTotal) {
-        clearQuadrant(taskNum, taskTotal);
-        drawArrayRects(arr, taskNum, taskTotal);
+        clearQuadrant(taskNum, taskTotal, Color.WHITE);
+        drawArrayRects(arr, taskNum, taskTotal, pauseTime);
         StdDraw.show();
         StdDraw.pause(pauseTime);
+    }
+    public void drawSortStep(int pauseTime, float[] arr, int taskNum, int taskTotal, Color color) {
+        clearQuadrant(taskNum, taskTotal, color);
+        drawArrayRects(arr, taskNum, taskTotal, pauseTime);
+        StdDraw.show();
+        //StdDraw.pause(pauseTime);
     }
 }

@@ -1,6 +1,4 @@
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.Random;
 import javax.sound.sampled.*;
 import javax.swing.*;
@@ -12,14 +10,11 @@ import java.awt.event.ActionListener;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static javax.sound.sampled.AudioSystem.getAudioInputStream;
-
 public class Sort {
     int size = 1;
     float[] arr = new float[size];
     Random rand = new Random();
     boolean isDrawing = false;
-    File soundFile = new File("src/sounds/hitHurt.wav");
 
     // Enumerators for sorting algorithms
     public enum SortType {
@@ -262,8 +257,6 @@ public class Sort {
         printExpectedTime(type[0], size[0]);
         processor.setupTasks(total[0], sorter.arr, type[0]);
 
-        StdDraw.pause(1000);
-        //sorter.playSoundOnAllRects();
         sorter.setRandomPenColor();
         //sorter.drawArrayRects(sorter.arr);
     }
@@ -287,4 +280,3 @@ public class Sort {
 
 
 }
-

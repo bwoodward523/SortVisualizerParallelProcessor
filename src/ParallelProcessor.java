@@ -3,11 +3,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class ParallelProcessor {
+    static boolean finishedSorting = false;
     public void setupTasks(int taskNum, float[] arr, Sort.SortType algorithm) {
         ExecutorService executor = Executors.newFixedThreadPool(taskNum);
         Sort sorter = new Sort();
         SortingAlgorithms alg = new SortingAlgorithms();
-        alg.GenerateSoundFiles();
+        alg.InitializeSoundFiles();
         int subArraySize = arr.length / taskNum;
         float[][] sortedSubArrays = new float[taskNum][];
 
@@ -63,6 +64,12 @@ public class ParallelProcessor {
 
         // Copy merged array back to original array
         System.arraycopy(mergedArray, 0, arr, 0, arr.length);
+
+        finishedSorting = true;
+        //StdDraw.setPenColor(StdDraw.GREEN);
+        //alg.drawSortStep(0, arr, 1, 1);
+        alg.endOfSort(mergedArray);
+        //StdDraw.rectangle(0.5, 0.5, 0.5, 0.5);
     }
 
     public static float[] mergeArrays(float[] arr1, float[] arr2, SortingAlgorithms sorter) {
