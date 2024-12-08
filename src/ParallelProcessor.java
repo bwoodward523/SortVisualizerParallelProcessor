@@ -63,6 +63,7 @@ public class ParallelProcessor {
 
         // Copy merged array back to original array
         System.arraycopy(mergedArray, 0, arr, 0, arr.length);
+        alg.endOfSort(arr);
     }
 
     public static float[] mergeArrays(float[] arr1, float[] arr2, SortingAlgorithms sorter) {

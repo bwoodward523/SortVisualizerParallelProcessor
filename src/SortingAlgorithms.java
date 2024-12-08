@@ -382,6 +382,38 @@ public class SortingAlgorithms {
             offset += rectWidth;
         }
     }
+    private void drawArrayRects(float[] arr, int taskNum,
+                                int taskTotal, int pauseTime) {
+        int quadrant = taskNum % taskTotal;
+        int rows = (int) Math.sqrt(taskTotal);
+        int cols = (int) Math.ceil((double) taskTotal / rows);
+        int row = quadrant / cols;
+        int col = quadrant % cols;
+
+        float xOffset = (float) col / cols;
+        float yOffset = (float) row / rows;
+        float width = 1f / cols;
+        float height = 1f / rows;
+
+        int size = arr.length;
+        float rectWidth = width / size;
+        float offset = xOffset + rectWidth / 2;
+
+        for (int i = 0; i < size; i++) {
+            StdDraw.filledRectangle(offset, yOffset + arr[i] * height / 2, rectWidth / 2, arr[i] * height / 2);
+            if(pauseTime > 0 ){
+                StdDraw.show();
+                StdDraw.pause(pauseTime);
+                float fractionalPosition = ((float) i / (float)arr.length) * 100.0f;
+                try {
+                    playSound(soundFiles[(int)fractionalPosition]);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            offset += rectWidth;
+        }
+    }
     public void drawBackground(Color color) {
         StdDraw.setPenColor(color);
         StdDraw.filledSquare(.5, .5, 1f);
@@ -392,8 +424,37 @@ public class SortingAlgorithms {
     public void drawSortStep(int pauseTime, float[] arr,
                              int taskNum, int taskTotal) {
         clearQuadrant(taskNum, taskTotal);
-        drawArrayRects(arr, taskNum, taskTotal);
+        if(pauseTime > 0){
+            StdDraw.setPenColor(Color.GREEN);
+        }
+        drawArrayRects(arr, taskNum, taskTotal, pauseTime);
         StdDraw.show();
         StdDraw.pause(pauseTime);
+    }
+    public void endOfSort(float[] arr) {
+        for (int i = 0; i < arr.length; i++) {
+            float fractionalPosition = ((float) i / (float)arr.length) * 100.0f;            StdDraw.setPenColor(StdDraw.RED);
+            // System.out.println("Playing sound at position: " + fractionalPosition + " i is" + i);
+            // System.out.println("" + arr.length);
+
+            try {
+                Thread.sleep(1/arr.length * 1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                playSound(soundFiles[(int)fractionalPosition]);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        float pauseTime = 1.0f/ (float)arr.length * 100.0f;
+        if(pauseTime > 0 && pauseTime < 1){
+            pauseTime = 1;
+        }
+        System.out.println("PuaseTIme: " + pauseTime);
+        drawSortStep( (int)pauseTime, arr,1,1);
+        System.out.println("what are you doing dummie");
+
     }
 }
