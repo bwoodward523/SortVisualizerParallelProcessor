@@ -5,6 +5,8 @@ import javax.sound.sampled.Clip;
 import java.awt.*;
 import java.io.*;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.PitchShifter;
@@ -27,78 +29,29 @@ public class SortingAlgorithms {
     private Random rand = new Random();
 
     // Sound Methods
-    static File inputFile = new File("src/sounds/longsound.wav");
+    //static File inputFile = new File("src/sounds/longsound.wav");
     static File[] soundFiles = new File[100];
 
-    void GenerateSoundFiles() {
-        System.out.println(inputFile.getAbsolutePath());
-        for (int i = 0; i < 2; i++) {
-            float pitchShiftFactor;
-            if (i < 50) {
-                pitchShiftFactor = 1.0f - (50 - i) * 0.02f; // Lower pitch
-            } else if (i == 50) {
-                pitchShiftFactor = 1.0f; // Original pitch
-            } else {
-                pitchShiftFactor = 1.0f + (i - 50) * 0.02f; // Higher pitch
+    void InitializeSoundFiles() {
+        File folder = new File("src/sounds/generated_wavs");
+        File[] files = folder.listFiles((dir, name) -> name.endsWith(".wav"));
+
+        if (files != null && files.length >= 100) {
+            for (int i = 0; i < 100; i++) {
+                soundFiles[i] = files[i];
             }
-            File outputFile = new File("src/sounds/longsound" + i + ".wav");
-            try {
-                changePitch(outputFile, pitchShiftFactor);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            soundFiles[i] = outputFile;
-            soundFiles[i] = new File("src/sounds/longsound" + i + ".wav");
+        } else {
+            throw new RuntimeException("Not enough .wav files in the directory");
         }
-    }
-    private static void changePitch(File outputFile, float pitchShiftFactor) throws Exception {
-        AudioInputStream inputStream = AudioSystem.getAudioInputStream(inputFile);
-        AudioFormat format = inputStream.getFormat();
-
-        AudioDispatcher dispatcher = AudioDispatcherFactory.fromPipe(
-                inputFile.getAbsolutePath(), (int)format.getSampleRate(), 1024, 0);
-        // Apply pitch shifting
-        dispatcher.addAudioProcessor(new PitchShifter(pitchShiftFactor, format.getSampleRate(), 1024, 256));
-
-        // Convert AudioFormat to TarsosDSPAudioFormat
-        TarsosDSPAudioFormat tarsosFormat = JVMAudioInputStream.toTarsosDSPFormat(format);
-
-        dispatcher.addAudioProcessor(new WriterProcessor(tarsosFormat, new RandomAccessFile(outputFile, "rw")));
-        dispatcher.run();
     }
     private static void playSound(File file) throws Exception {
         Clip clip = AudioSystem.getClip();
         clip.open(AudioSystem.getAudioInputStream(file));
         clip.start();
-        Thread.sleep(clip.getMicrosecondLength() / 1000);
+        //Thread.sleep(clip.getMicrosecondLength() / 1000);
     }
 
 
-//        try {
-//            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(getClass().getResource("laserShoot.wav"));
-//            Clip clip = AudioSystem.getClip();
-//            clip.open(audioInputStream);
-//            clip.start();
-//            AudioFormat baseFormat = audioInputStream.getFormat();
-//            AudioFormat newFormat = new AudioFormat(
-//                    baseFormat.getEncoding(),
-//                    baseFormat.getSampleRate() * (float)Math.random() * 10000.0f,
-//                    baseFormat.getSampleSizeInBits(),
-//                    baseFormat.getChannels(),
-//                    baseFormat.getFrameSize(),
-//                    baseFormat.getFrameRate() * pitch,
-//                    baseFormat.isBigEndian()
-//            );
-//            return clip;
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
-
-    public float convertArrayHeightToPitchRange(float height) {
-        return (height * 2) - 1;
-    }
 
 
     // Sorting Algorithms
@@ -127,7 +80,7 @@ public class SortingAlgorithms {
                 }
 
             }
-            drawSortStep(2, arr, taskNum, taskTotal);
+            drawSortStep(0, arr, taskNum, taskTotal);
         }
         System.out.println("Selection Sort Finished\n");
     }

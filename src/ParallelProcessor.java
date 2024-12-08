@@ -7,7 +7,7 @@ public class ParallelProcessor {
         ExecutorService executor = Executors.newFixedThreadPool(taskNum);
         Sort sorter = new Sort();
         SortingAlgorithms alg = new SortingAlgorithms();
-        alg.GenerateSoundFiles();
+        alg.InitializeSoundFiles();
         int subArraySize = arr.length / taskNum;
         float[][] sortedSubArrays = new float[taskNum][];
 
