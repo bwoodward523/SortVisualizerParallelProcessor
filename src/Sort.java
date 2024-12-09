@@ -11,7 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
 
 public class Sort {
@@ -84,14 +83,14 @@ public class Sort {
     public static void printExpectedTime(SortType type, int size)
     {
         switch (type) {
-            case BUBBLE, SELECTION:
-                double result = ((double) (size ^ 2) / (100^2))*0.01;
-                System.out.println("Expected time complexity: "+result);
-                break;
-            case ANGEL:
-                double result2 = (size*(factorial(size)))*0.01;
-                System.out.println("Expected time complexity: "+result2);
-                break;
+            case BUBBLE, SELECTION -> {
+                double result = ((double) (size ^ 2) / (100 ^ 2)) * 0.01;
+                System.out.println("Expected time complexity: " + result);
+            }
+            case ANGEL -> {
+                double result2 = (size * (factorial(size))) * 0.01;
+                System.out.println("Expected time complexity: " + result2);
+            }
         }
     }
 
@@ -266,6 +265,33 @@ public class Sort {
         //sorter.playSoundOnAllRects();
         sorter.setRandomPenColor();
         //sorter.drawArrayRects(sorter.arr);
+
+        JFrame framer = new JFrame("Restart Example");
+        JButton restartButton = new JButton("Restart");
+        restartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    // Close the current instance
+                    framer.dispose();
+                    // Launch a new instance
+                    String javaBin = System.getProperty("java.home") + "/bin/java";
+                    String classPath = System.getProperty("java.class.path");
+                    String className = Sort.class.getName();
+
+                    ProcessBuilder builder = new ProcessBuilder(javaBin, "-cp", classPath, className);
+                    builder.start();
+                    System.exit(0);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        framer.add(restartButton);
+        framer.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        framer.pack();
+        framer.setVisible(true);
     }
 
     private static void updateEstimatedTime(JComboBox<String> typeDropDown, JTextField nodeBox, JTextField estimatedTimeBox, SortType[] type) {
@@ -284,7 +310,5 @@ public class Sort {
             estimatedTimeBox.setText(estimatedTime + " seconds");
         }
     }
-
-
 }
 
