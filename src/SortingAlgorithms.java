@@ -31,7 +31,12 @@ public class SortingAlgorithms {
     // Sound Methods
     //static File inputFile = new File("src/sounds/longsound.wav");
     static File[] soundFiles = new File[100];
-
+    /**********************************************************
+     * METHOD: InitializeSoundFiles() *
+     * DESCRIPTION: initializes and array full of all the necessary sound files for execution *
+     * PARAMETERS: none *
+     * RETURN VALUE: none *
+     **********************************************************/
     void InitializeSoundFiles() {
         File folder = new File("src/sounds/generated_wavs");
         File[] files = folder.listFiles((dir, name) -> name.endsWith(".wav"));
@@ -44,6 +49,12 @@ public class SortingAlgorithms {
             throw new RuntimeException("Not enough .wav files in the directory");
         }
     }
+    /**********************************************************
+     * METHOD: playSoudn() *
+     * DESCRIPTION: plays a sound file *
+     * PARAMETERS: file path *
+     * RETURN VALUE: none *
+     **********************************************************/
     private static void playSound(File file) throws Exception {
         Clip clip = AudioSystem.getClip();
         clip.open(AudioSystem.getAudioInputStream(file));
@@ -55,6 +66,14 @@ public class SortingAlgorithms {
 
 
     // Sorting Algorithms
+
+    /**********************************************************
+     * METHOD: selectionSort() *
+     * DESCRIPTION: our implementation of the selection sort
+     * description can be found here: https://www.geeksforgeeks.org/selection-sort-algorithm-2/*
+     * PARAMETERS: array to be sorted, number of task subdivision, total tasks *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void selectionSort(float[] arr, int taskNum, int taskTotal) {
         //Clip sound = playSound(0);
         int size = arr.length;
@@ -85,6 +104,13 @@ public class SortingAlgorithms {
         System.out.println("Selection Sort Finished\n");
     }
 
+    /**********************************************************
+     * METHOD: bubbleSort() *
+     * DESCRIPTION: our implementation of the bubble sort
+     * description can be found here: https://www.geeksforgeeks.org/bubble-sort-algorithm/*
+     * PARAMETERS: array to be sorted, number of task subdivision, total tasks *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void bubbleSort(float[] arr, int taskNum, int taskTotal) {
         //Clip sound = playSound(0);
         int size = arr.length;
@@ -110,6 +136,13 @@ public class SortingAlgorithms {
         System.out.println("Bubble Sort Finished\n");
     }
 
+    /**********************************************************
+     * METHOD: angelSort() *
+     * DESCRIPTION: a sorting algorithm that our lovely minds came up with
+     * swaps elements at random until the array is sorted
+     * PARAMETERS: array to be sorted, number of task subdivision, total tasks *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void angelSort(float[] arr, int taskNum, int taskTotal) {
         //Clip sound = playSound(0);
         int size = arr.length;
@@ -135,6 +168,13 @@ public class SortingAlgorithms {
         System.out.println("Angel Sort Finished\n");
     }
 
+    /**********************************************************
+     * METHOD: quickSort() *
+     * DESCRIPTION: our implementation of the quick sort
+     * description can be found here: https://www.geeksforgeeks.org/quick-sort-algorithm/*
+     * PARAMETERS: array to be sorted, number of task subdivision, total tasks, beginning and end of necessary sorting indicies *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void quickSort(float arr[], int begin, int end, int taskNum, int taskTotal) {
         if (begin < end) {
             int partitionIndex = partition(arr, begin, end, taskNum, taskTotal);
@@ -144,6 +184,13 @@ public class SortingAlgorithms {
         }
     }
 
+    /**********************************************************
+     * METHOD: cycleSort() *
+     * DESCRIPTION: our implementation of the cycle sort
+     * description can be found here: https://www.geeksforgeeks.org/cycle-sort/*
+     * PARAMETERS: array to be sorted, number of task subdivision, total tasks *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void cycleSort(float[] arr, int taskNum, int taskTotal)
     {
         //Clip sound = playSound(0);
@@ -213,6 +260,14 @@ public class SortingAlgorithms {
             drawSortStep(0, arr, taskNum, taskTotal);
         }
     }
+
+    /**********************************************************
+     * METHOD: mergeSort() *
+     * DESCRIPTION: our implementation of the merge sort
+     * description can be found here: https://www.geeksforgeeks.org/merge-sort/*
+     * PARAMETERS: array to be sorted, number of task subdivision, total tasks *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void mergeSort(float[] arr, int taskNum, int taskTotal) {
         //Clip sound = playSound(0);
         int size = arr.length;
@@ -287,16 +342,12 @@ public class SortingAlgorithms {
 
     // Utility Methods for Sorting Algorithms
 
-    private static float getMax(float[] arr)
-    {
-        float max = arr[0];
-        for (int i = 1; i < arr.length; i++) {
-            if (arr[i] > max){
-                max = arr[i];
-            }
-        }
-        return max;
-    }
+    /**********************************************************
+     * METHOD: parition() *
+     * DESCRIPTION: utility method necessary for quick sort
+     * PARAMETERS: array to be sorted, number of task subdivision, total tasks, beginning and end of sort index *
+     * RETURN VALUE: none *
+     **********************************************************/
     private int partition(float arr[], int begin, int end, int taskNum, int taskTotal) {
        // Clip sound = playSound(0);
         float pivot = arr[end];
@@ -328,6 +379,12 @@ public class SortingAlgorithms {
         return i + 1;
     }
 
+    /**********************************************************
+     * METHOD: isSorted() *
+     * DESCRIPTION: checks if an array is sorted
+     * PARAMETERS: array *
+     * RETURN VALUE: boolean of if the method is sorted *
+     **********************************************************/
     public static boolean isSorted(float[] a) {
         for (int i = 0; i < a.length - 1; i++) {
             if (a[i] > a[i + 1]) {
@@ -340,6 +397,12 @@ public class SortingAlgorithms {
 
 
     // Redraw Methods for Sorting Algorithms
+    /**********************************************************
+     * METHOD: clearQuadrant() *
+     * DESCRIPTION: clears the quadrant of the array that is being sorted
+     * PARAMETERS: number of task subdivision, total tasks *
+     * RETURN VALUE: none *
+     **********************************************************/
     private void clearQuadrant(int taskNum, int taskTotal) {
         int quadrant = taskNum % taskTotal;
         int rows = (int) Math.sqrt(taskTotal);
@@ -360,28 +423,12 @@ public class SortingAlgorithms {
         StdDraw.filledRectangle(xOffset + width / 2, yOffset + height / 2, width / 2, height / 2);
         StdDraw.setPenColor(StdDraw.WHITE);
     }
-    private void drawArrayRects(float[] arr, int taskNum,
-                                int taskTotal) {
-        int quadrant = taskNum % taskTotal;
-        int rows = (int) Math.sqrt(taskTotal);
-        int cols = (int) Math.ceil((double) taskTotal / rows);
-        int row = quadrant / cols;
-        int col = quadrant % cols;
-
-        float xOffset = (float) col / cols;
-        float yOffset = (float) row / rows;
-        float width = 1f / cols;
-        float height = 1f / rows;
-
-        int size = arr.length;
-        float rectWidth = width / size;
-        float offset = xOffset + rectWidth / 2;
-
-        for (int i = 0; i < size; i++) {
-            StdDraw.filledRectangle(offset, yOffset + arr[i] * height / 2, rectWidth / 2, arr[i] * height / 2);
-            offset += rectWidth;
-        }
-    }
+    /**********************************************************
+     * METHOD: drawArrayRects() *
+     * DESCRIPTION: draws the array rectangles
+     * PARAMETERS: array of numbers, number of task subdivision, total tasks, how much pause between each draw *
+     * RETURN VALUE: none *
+     **********************************************************/
     private void drawArrayRects(float[] arr, int taskNum,
                                 int taskTotal, int pauseTime) {
         int quadrant = taskNum % taskTotal;
@@ -414,13 +461,15 @@ public class SortingAlgorithms {
             offset += rectWidth;
         }
     }
-    public void drawBackground(Color color) {
-        StdDraw.setPenColor(color);
-        StdDraw.filledSquare(.5, .5, 1f);
-    }
 
 
     //Use to redraw the array in the sorting functions (Requires double Buffering)
+    /**********************************************************
+     * METHOD: drawSortStep() *
+     * DESCRIPTION: draws an individual step of the sort
+     * PARAMETERS: number of task subdivision, total tasks, pause time, array *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void drawSortStep(int pauseTime, float[] arr,
                              int taskNum, int taskTotal) {
         clearQuadrant(taskNum, taskTotal);
@@ -431,6 +480,12 @@ public class SortingAlgorithms {
         StdDraw.show();
         StdDraw.pause(pauseTime);
     }
+    /**********************************************************
+     * METHOD: endOfSort() *
+     * DESCRIPTION: plays the sound at the end of the sort and redraws the array
+     * PARAMETERS: array *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void endOfSort(float[] arr) {
         for (int i = 0; i < arr.length; i++) {
             float fractionalPosition = ((float) i / (float)arr.length) * 100.0f;            StdDraw.setPenColor(StdDraw.RED);

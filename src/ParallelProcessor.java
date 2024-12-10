@@ -3,6 +3,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class ParallelProcessor {
+    /**********************************************************
+     * METHOD: setupTasks() *
+     * DESCRIPTION: sets up each core with an even amount of work for parallel processing
+     * PARAMETERS: number of tasks, array to be sorted, type of sort *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void setupTasks(int taskNum, float[] arr, Sort.SortType algorithm) {
         ExecutorService executor = Executors.newFixedThreadPool(taskNum);
         Sort sorter = new Sort();
@@ -66,6 +72,12 @@ public class ParallelProcessor {
         alg.endOfSort(arr);
     }
 
+    /**********************************************************
+     * METHOD: mergeArrays() *
+     * DESCRIPTION: merges two sorted arrays together
+     * PARAMETERS: two sorted arrays, sorting algorithm interface *
+     * RETURN VALUE: merged arrays *
+     **********************************************************/
     public static float[] mergeArrays(float[] arr1, float[] arr2, SortingAlgorithms sorter) {
         int n1 = arr1.length;
         int n2 = arr2.length;

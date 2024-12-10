@@ -12,7 +12,27 @@ import java.awt.event.ActionListener;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import static javax.sound.sampled.AudioSystem.getAudioInputStream;
-
+/*******************************************************************
+ * Sort Visualizer *
+ * *
+ * PROGRAMMER: Emmet Larson, Brandon Woodward, Zach Cox *
+ * COURSE: CS340 *
+ * DATE: 12/9/2024 *
+ * REQUIREMENT: Final Project *
+ * *
+ * DESCRIPTION: *
+ * The following program is a sorting algorithm visualizer. *
+ * It allows the user to select a sorting algorithm, the number *
+ * of nodes to sort, and the number of cores to use. The program *
+ * will then visualize the sorting process using the selected *
+ * algorithm. *
+ * *
+ * COPYRIGHT: This code is copyright (C) 2024 Emmet Larson, Brandon Woodward, Zach Cox*
+ * and Dean Zeller. *
+ * *
+ * CREDITS: This code was written with the help of ChatGPT and general internet searching. *
+ * *
+ *******************************************************************/
 public class Sort {
     int size = 1;
     float[] arr = new float[size];
@@ -30,6 +50,12 @@ public class Sort {
         MERGE
     }
 
+    /**********************************************************
+     * METHOD: setSize() *
+     * DESCRIPTION: sets the size of the global array to be sorted *
+     * PARAMETERS: integer *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void setSize(int s) {
         if (s > 0) {
             size = s;
@@ -38,14 +64,24 @@ public class Sort {
             throw new IllegalArgumentException("Size must be positive");
         }
     }
-
+    /**********************************************************
+     * METHOD: printArray() *
+     * DESCRIPTION: prints out each element in the array in order*
+     * PARAMETERS: none *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void printArray() {
         // Print the array
         for (float num : arr) {
             System.out.print(num + " ");
         }
     }
-
+    /**********************************************************
+     * METHOD: initializeArray() *
+     * DESCRIPTION: fills the global array with random values to be sorted*
+     * PARAMETERS: none *
+     * RETURN VALUE: none *
+     **********************************************************/
     private void initializeArray() {
         // Fill the array with random integers
         for (int i = 0; i < arr.length; i++) {
@@ -56,7 +92,12 @@ public class Sort {
         }
     }
 
-
+    /**********************************************************
+     * METHOD: setRandomPenColor() *
+     * DESCRIPTION: sets the STDDraw pen color to a random color *
+     * PARAMETERS: none *
+     * RETURN VALUE: none *
+     **********************************************************/
     private void setRandomPenColor() {
         int red = (int) (Math.random() * 256);
         int green = (int) (Math.random() * 256);
@@ -67,12 +108,23 @@ public class Sort {
     }
 
 
-
+    /**********************************************************
+     * METHOD: drawBackground() *
+     * DESCRIPTION: draws over the background of the window *
+     * PARAMETERS: STDDraw color *
+     * RETURN VALUE: none *
+     **********************************************************/
     public void drawBackground(Color color) {
         StdDraw.setPenColor(color);
         StdDraw.filledSquare(.5, .5, 1f);
     }
 
+    /**********************************************************
+     * METHOD: factorial() *
+     * DESCRIPTION: computes the factorial of a desired number *
+     * PARAMETERS: integer *
+     * RETURN VALUE: integer  *
+     **********************************************************/
     public static int factorial(int n) {
         if (n == 0) {
             return 1;
@@ -80,6 +132,12 @@ public class Sort {
         return n * factorial(n - 1);
     }
 
+    /**********************************************************
+     * METHOD: printExpectedTime() *
+     * DESCRIPTION: prints the exepected time to complete a sort to the console *
+     * PARAMETERS: sort type, integer *
+     * RETURN VALUE: none *
+     **********************************************************/
     public static void printExpectedTime(SortType type, int size)
     {
         switch (type) {
@@ -93,7 +151,12 @@ public class Sort {
             }
         }
     }
-
+    /**********************************************************
+     * METHOD: calculateExpectedTime() *
+     * DESCRIPTION: computes the expected time for a sort to complete *
+     * PARAMETERS: sort type, integer *
+     * RETURN VALUE: double of the expected time to complete in seconds *
+     **********************************************************/
     public static double calculateExpectedTime(SortType type, int size)
     {
         //BUBBLE,SELECTION,ANGEL,QUICK,CYCLE,MERGE
@@ -112,6 +175,12 @@ public class Sort {
         return result;
     }
 
+    /**********************************************************
+     * METHOD: main() *
+     * DESCRIPTION: main method that displays the UI and reads the user input *
+     * PARAMETERS: args *
+     * RETURN VALUE: none *
+     **********************************************************/
     public static void main (String[]args){
         final int[] total = {1};
         final SortType[] type = {SortType.ANGEL};
@@ -294,6 +363,13 @@ public class Sort {
         framer.setVisible(true);
     }
 
+
+    /**********************************************************
+     * METHOD: updateEstimatedTime() *
+     * DESCRIPTION: updates the estimated time for completion based on the user altering values in the UI fields *
+     * PARAMETERS: UI Elements, sort type *
+     * RETURN VALUE: none *
+     **********************************************************/
     private static void updateEstimatedTime(JComboBox<String> typeDropDown, JTextField nodeBox, JTextField estimatedTimeBox, SortType[] type) {
         String selectedType = (String) typeDropDown.getSelectedItem();
         if (selectedType != null && !nodeBox.getText().isEmpty()) {
