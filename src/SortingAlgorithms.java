@@ -507,9 +507,8 @@ public class SortingAlgorithms {
         if(pauseTime > 0 && pauseTime < 1){
             pauseTime = 1;
         }
-        System.out.println("PuaseTIme: " + pauseTime);
+        System.out.println("PauseTIme: " + pauseTime);
         drawSortStep( (int)pauseTime, arr,1,1);
-        System.out.println("what are you doing dummie");
 
     }
 }

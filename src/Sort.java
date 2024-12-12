@@ -29,9 +29,7 @@ import static javax.sound.sampled.AudioSystem.getAudioInputStream;
  * *
  * COPYRIGHT: This code is copyright (C) 2024 Emmet Larson, Brandon Woodward, Zach Cox*
  * and Dean Zeller. *
- * *
- * CREDITS: This code was written with the help of ChatGPT and general internet searching. *
- * *
+ *
  *******************************************************************/
 public class Sort {
     int size = 1;
@@ -203,7 +201,7 @@ public class Sort {
         frame.setIconImage(icon.getImage());
 
         // Create a drop-down (JComboBox)
-        String[] types = {"Angel", "Bubble", "Selection", "Quick", "Cycle", "Merge"};
+        String[] types = {"Angel", "Bubble", "Selection", "Quick", "Cycle"/*, "Merge"*/};
         JComboBox<String> typeDropDown = new JComboBox<>(types);
         typeDropDown.setToolTipText("Select a Sorting Algorithm");
 

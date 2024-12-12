@@ -11,7 +11,7 @@ public class ParallelProcessor {
      **********************************************************/
     public void setupTasks(int taskNum, float[] arr, Sort.SortType algorithm) {
         ExecutorService executor = Executors.newFixedThreadPool(taskNum);
-        Sort sorter = new Sort();
+        //Sort sorter = new Sort();
         SortingAlgorithms alg = new SortingAlgorithms();
         alg.InitializeSoundFiles();
         int subArraySize = arr.length / taskNum;
